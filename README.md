@@ -1,7 +1,9 @@
 # Pyrequests
-一个简单https网络请求测试库,作为个人学习记录,暂不支持代理,如果你用过requests,它将会变得非常容易, 内置firefox34指纹.
+基于socket开发的一个网络测试库,供研究https/tls参考,
+如果你用过requests,它将会变得非常容易, 内置firefox34版本指纹
 
 **安装依赖**
+测试版本python3.7.5
 requirement.txt
 ```
 cryptography==36.0.1
