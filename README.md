@@ -12,8 +12,8 @@ pyOpenSSL==21.0.0
 ```
 >>> import pyrequests
 >>> sess = pyrequests.HttpSession()
->>> r = sess.get('https://httpbin.org/get',headers={'ua':'3301'},cookies={'k':'3301')
->>> r = sess.get('https://httpbin.org/get',headers={'ua':'3301'},cookies='k=3301')
+>>> r = sess.get('https://httpbin.org/get',headers={'User-Agent':'3301'},cookies={'k':'3301')
+>>> r = sess.get('https://httpbin.org/get',headers={'User-Agent':'3301'},cookies='k=3301')
 >>>r.status_code
 200
 >>> r.headers['content-type']
