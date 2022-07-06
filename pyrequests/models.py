@@ -1,23 +1,13 @@
 import gzip
 import json
+
 from collections import OrderedDict,defaultdict
-
 from urllib.parse import urlparse,urlencode,quote,unquote
-
 import urllib.parse as parse
-
-
-
-url='https://www.ihg.com.cn/holidayinnexpress/hotels/cn/zh/find-hotels/hotel/rooms?qDest=%E6%B7%B1%E5%9C%B3%E5%B8%82%E4%BA%BA%E6%B0%91%E6%94%BF%E5%BA%9C&qCiMy=72022&qCiD=28&qCoMy=82022&qCoD=14&qAdlt=1&qChld=0&qRms=1&qRtP=6CBARC&qSlH=SZXST&qAkamaiCC=CN&qSrt=sBR&qBrs=re.ic.in.vn.cp.vx.hi.ex.rs.cv.sb.cw.ma.ul.ki.va.ii.sp.nd.ct.sx.we.lx&qAAR=6CBARC&qWch=0&qSmP=1&setPMCookies=true&qRad=30&qRdU=mi&srb_u=1&qpMn=0&qSHBrC=EX'
-
-d1='https://www.ihg.com.cn/holidayinnexpress/hotels/cn/zh/find-hotels/hotel/rooms?qDest=深圳市人民政府&qCiMy=72022&qCiD=28&qCoMy=82022&qCoD=14&qAdlt=1&qChld=0&qRms=1&qRtP=6CBARC&qSlH=SZXST&qAkamaiCC=CN&qSrt=sBR&qBrs=re.ic.in.vn.cp.vx.hi.ex.rs.cv.sb.cw.ma.ul.ki.va.ii.sp.nd.ct.sx.we.lx&qAAR=6CBARC&qWch=0&qSmP=1&setPMCookies=true&qRad=30&qRdU=mi&srb_u=1&qpMn=0&qSHBrC=EX'
-
 
 def encodeURI(url):
     url = unquote(url)
     return quote(url,safe='!@#$&*()=:/;?+\'"')
-
-
 
 
 class Request(object):
@@ -56,8 +46,6 @@ class Request(object):
 
         #url不编码字符
 
-        safe = ':/?:@&=+$'
-
         self.path = self.pre_path
         if self.params:
 
@@ -66,15 +54,10 @@ class Request(object):
 
 
 
-
     def __repr__(self):
         template = '<Request {method}>'
         return  template.format(method=self.method )
 
-
-homeurl='https://www.ihg.com.cn/holidayinnexpress/hotels/cn/zh/find-hotels/hotel/rooms?qDest=%E6%B7%B1%E5%9C%B3%E5%B8%82%E4%BA%BA%E6%B0%91%E6%94%BF%E5%BA%9C&qCiMy=72022&qCiD=28&qCoMy=82022&qCoD=14&qAdlt=1&qChld=0&qRms=1&qRtP=6CBARC&qSlH=SZXST&qAkamaiCC=CN&qSrt=sBR&qBrs=re.ic.in.vn.cp.vx.hi.ex.rs.cv.sb.cw.ma.ul.ki.va.ii.sp.nd.ct.sx.we.lx&qAAR=6CBARC&qWch=0&qSmP=1&setPMCookies=true&qRad=30&qRdU=mi&srb_u=1&qpMn=0&qSHBrC=EX'
-
-#Request(url='http://127.0.0.1/?api=1&abc=%E5%AD%97%E7%AC%A6',params={'a': '%E5%AD%97%E7%AC%A6'})
 
 
 class Response(object):
