@@ -43,7 +43,7 @@ b'GET /get HTTP/1.1\r\nHost: httpbin.org ...
 - http/1.1
 
 # 关于pyrequests
-后期考虑添加代理,动态tls指纹,tls1.3,http2</br>
+时间充足的话,后面考虑添加代理,动态tls指纹,tls1.3,http2</br>
 有什么bug, 或者好设计模式, 欢迎大家issues</br>
 本人vx号: ZanCoder,如果感兴趣和我一起学习开发吧
 
