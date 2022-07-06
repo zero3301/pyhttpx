@@ -34,6 +34,13 @@ b'GET /get HTTP/1.1\r\nHost: httpbin.org ...
 ```
 >>> r = sess.post('https://httpbin.org/get',data={})
 >>> r = sess.post('https://httpbin.org/get',json={})
+```
+## JA3
+目前支持仅0,65281, 10 ,11,35,13172,16,5,13扩展,如果想修改指纹,可以扩展打乱,不要额外的添加指纹标识,以免出现bug
+```
+>>>ja3 = [0,65281, 10 ,11,35,13172,16,5,13]
+>>>random.shuffle(ja3)
+>>>sess = HttpSession(ja3=ja3)
 
 ```
 
