@@ -16,8 +16,6 @@ pyOpenSSL==21.0.0
 >>> r = sess.get('https://httpbin.org/get',headers={'User-Agent':'3301'},cookies='k=3301')
 >>>r.status_code
 200
->>> r.headers['content-type']
-'application/json; charset=utf8'
 >>> r.encoding
 'utf-8'
 >>> r.text
