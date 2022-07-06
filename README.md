@@ -5,7 +5,6 @@
 requirement.txt
 ```
 cryptography==36.0.1
-pyOpenSSL==21.0.0
 ```
 
 ## GET

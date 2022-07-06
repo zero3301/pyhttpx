@@ -1,7 +1,6 @@
 import struct
 from pyrequests.layers.tls.crypto.prf import prf
 
-import OpenSSL
 
 class SessionContext:
     def __init__(self):
@@ -18,7 +17,7 @@ class CertificateContext:
         first_cer_length = struct.unpack('!I',first_cer_length)[0]
         cert = flowtext[10:10 + first_cer_length]
 
-        self.cert = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_ASN1, cert)
+        #self.cert = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_ASN1, cert)
         #print('取消证书验证')
         #pulicKey = OpenSSL.crypto.dump_publickey(OpenSSL.crypto.FILETYPE_PEM, self.cert.get_pubkey())
         #self.rsa_pulicKey = rsa.PublicKey.load_pkcs1_openssl_pem(pulicKey)
