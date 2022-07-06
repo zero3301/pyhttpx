@@ -3,22 +3,11 @@ import json
 import inspect
 import platform
 
-
-
-
 from urllib.parse import urlencode
 
-from pyrequests.compat import *
 from pyrequests.models import Request
 from pyrequests.utils import default_headers
-
-if platform.system().lower() == 'linux':
-    from pyrequests.layers.tls.linux.tls_session import TlsSession
-else:
-    from pyrequests.layers.tls.window.tls_session import TlsSession
-
-
-#from pyrequests.layers.tls.tls_session import TlsSession
+from pyrequests.layers.tls.tls_session import TlsSession
 
 
 class CookieJar(object):
