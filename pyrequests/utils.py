@@ -2,8 +2,7 @@
 
 
 def default_headers():
-    #python-requests/2.25.1
-    u = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'
+
     return {
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0',
         'Pragma': 'no-cache',
@@ -20,8 +19,8 @@ def default_headers():
 def is_ascii(c):
     return True if ord(c) < 128 else False
 
-def urlencoded(s):
 
+def urlencoded(s):
     out = ''
     for c in s:
         if is_ascii(c) or c in '!@# $&*()=:/;?+':

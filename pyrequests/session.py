@@ -16,6 +16,8 @@ if platform.system().lower() == 'linux':
     from pyrequests.layers.tls.linux.tls_session import TlsSession
 else:
     from pyrequests.layers.tls.window.tls_session import TlsSession
+
+
 #from pyrequests.layers.tls.tls_session import TlsSession
 
 
@@ -34,7 +36,7 @@ class CookieManger(object):
         if self.cookies.get(addr):
             self.cookies[addr].update(cookie)
         else:
-            self.cookies.setdefault(addr ,cookie)
+            self.cookies[addr] = cookie
     def get(self, k):
         return self.cookies.get(k ,{})
 
@@ -54,11 +56,11 @@ class HttpSession(object):
         if isinstance(set_cookies, str):
             for set_cookie in set_cookies.split(';'):
                 k, v = set_cookie.split('=', 1)
-                c.setdefault(k ,v)
+                c[k] = v
         elif isinstance(set_cookies, list):
             for set_cookie in set_cookies:
                 k, v = set_cookie.split(';')[0].split('=', 1)
-                c.setdefault(k ,v)
+                c[k] = v
         elif isinstance(set_cookies, dict):
             c.update(set_cookies)
         self.cookie_manger.set_cookie(req,c)
@@ -87,7 +89,7 @@ class HttpSession(object):
 
         send_kw  = {}
         if _cookies:
-            send_kw.setdefault('Cookie', ';'.join('{}={}'.format(k,v) for k,v in _cookies.items()))
+            send_kw['Cookie'] = ';'.join('{}={}'.format(k,v) for k,v in _cookies.items())
         self.req = req
         msg = self.prep_request(req, send_kw)
         resp = self.send(req, msg)
@@ -103,7 +105,6 @@ class HttpSession(object):
         for k,v in dh.items():
             msg += ('%s: %s\r\n' % (k ,v)).encode()
 
-
         req_body = ''
         if req.method == 'POST':
             if req.data:
@@ -116,7 +117,7 @@ class HttpSession(object):
 
                     if not b'Content-Type' in msg:
                         msg += b'Content-Type: application/x-www-form-urlencoded\r\n'
-                    req_body = urlencode(data)
+                    req_body = urlencode(req.data)
 
 
             elif req.json:
@@ -150,12 +151,11 @@ class HttpSession(object):
             result = self.tls_session.send(msg)
             if not result:
                 #报错
-                print('报错')
                 del self.tlss[addr]
                 return self.send(req, msg)
             response = self.tls_session.response
             response.request = req
-            response.raw = msg
+            response.request.raw = msg
             if response.headers:
                 self.handle_cookie(req, response.headers.get('Set-Cookie'))
             response.cookies = response.headers.get('Set-Cookie', {})
@@ -185,30 +185,16 @@ class HttpSession(object):
 
     def __del__(self):
         if hasattr(self, 'tls_session') and self.tls_session:
-
             self.tls_session.socket.shutdown(1)
             self.tls_session.socket.close()
+
 if __name__ == '__main__':
     import pprint
     import time
     sess = HttpSession()
-    url = 'https://127.0.0.1'
-    #url = 'https://httpbin.org/get'
-    #url = 'https://www.baidu.com'
-
-    headers = {
-        'Cookie': 'a=1;b=2',
-        #'User-Agent': '3301'
-    }
-    data = {
-        'a': '1',
-        'b': '中国'
-    }
-    url = 'https://www.baidu.com'
+    url = 'https://httpbin.org/get'
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36",}
-
     r = sess.get(url,headers=headers)
-
     print(r.text[:200])
 
 

@@ -1,7 +1,6 @@
 import gzip
 
 
-
 def handle(str_chunks):
     html = b''
     # while str_chunks:

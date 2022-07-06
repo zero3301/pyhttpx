@@ -105,7 +105,7 @@ class Response(object):
             if k == 'Set-Cookie':
                 headers[k].append(v)
             else:
-                headers.setdefault(k.strip() ,v.strip())
+                headers[k.strip()] = v.strip()
 
         if not headers.get('Connection'):
             self.tls_ctx.isclosed = True

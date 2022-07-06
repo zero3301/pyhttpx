@@ -90,7 +90,7 @@ class ExtApplicationLayerProtocolNegotiation:
         temp = b'\x02\x68\x31\x08' + 'http/1.1'.encode()
         temp = b'%s%s' % (struct.pack('!H',len(temp)), temp)
         #firefox34
-        #temp=bytes.fromhex('001908737064792f332e3106737064792f3308687474702f312e31')
+        temp=bytes.fromhex('001908737064792f332e3106737064792f3308687474702f312e31')
         return b'%s%s%s' % (struct.pack('!H',cls._type),struct.pack('!H',len(temp)), temp)
 class ExtStatusRequest:
     _type = 0x05
@@ -132,7 +132,7 @@ class ExtSignatureAlgorithms:
     def dump(cls):
         temp = b'\x00\x16\x04\x03\x05\x03\x06\x03\x08\x04\x08\x05\x08\x06\x04\x01\x05\x01\x06\x01\x02\x03\x02\x01'
         #firefox34
-        #temp = bytes.fromhex('001004010501020104030503020304020202')
+        temp = bytes.fromhex('001004010501020104030503020304020202')
         return b'%s%s%s' % (struct.pack('!H',cls._type),struct.pack('!H',len(temp)), temp)
 class ExtPskKeyExchangeModes:
     _type = 0x2d
@@ -163,7 +163,7 @@ class Extja3:
 
 def dump_extension(host):
     #771,4865,0-65281-10-51-43-13-45,29-23,0
-    arr = [
+    exts = [
         ExtServerName.dump(host),#10
         #ExtExTenedMasterSecret.dump(),#23,扩展主密钥，加入上下文
         ExtRenegotitationInfo.dump(),#65281
@@ -183,5 +183,5 @@ def dump_extension(host):
         #Extja3().dump()
 
            ]
-    temp = b''.join(arr)
+    temp = b''.join(exts)
     return b'%s%s' % (struct.pack('!H',len(temp)), temp)
