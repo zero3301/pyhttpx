@@ -174,21 +174,10 @@ class HttpSession(object):
     def post(self,url, **kwargs):
         return self.request('POST', url, **kwargs)
 
-    def close(self):
-        self.tls_session.socket.close()
-
     @property
     def content(self):
         return self.tls_session.response.content
-    def __enter__(self):
-        return self
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.tls_session.socket.close()
 
-    def __del__(self):
-        if hasattr(self, 'tls_session') and self.tls_session:
-            self.tls_session.socket.shutdown(1)
-            self.tls_session.socket.close()
 
 if __name__ == '__main__':
     import pprint
