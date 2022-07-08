@@ -66,11 +66,11 @@ class TlsSession():
         #self.socket.settimeout()
 
         try:
-
             self.socket.connect((host, port))
         except ConnectionRefusedError:
-            warnings.warn('无法连接 %s' % self.host)
-            return False
+
+            raise ConnectionError('无法连接 %s' % self.host)
+
         else:
             self.local_ip, self.local_port = self.socket.getsockname()[:2]
             self.remote_ip, self.remote_port = self.socket.getpeername()[:2]
@@ -102,6 +102,7 @@ class TlsSession():
             cache = b''
             if recv:
                 while recv:
+
                     handshake_type = struct.unpack('!B', recv[:1])[0]
                     length = struct.unpack('!H', recv[3:5])[0]
                     flowtext = recv[5:5 + length]
@@ -220,7 +221,8 @@ class TlsSession():
 
             cache = b''
 
-            while recv:
+
+            while recv and len(recv) >=5:
                 handshake_type = struct.unpack('!B', recv[:1])[0]
                 length = struct.unpack('!H', recv[3:5])[0]
                 flowtext = recv[5:5 + length]
