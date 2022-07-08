@@ -185,13 +185,13 @@ if __name__ == '__main__':
     import random
 
     ja3 = [0,65281, 10 ,11,35,13172,16,5,13]
-    random.shuffle(ja3)
+    #random.shuffle(ja3)
     sess = HttpSession(ja3=ja3)
     url = 'https://httpbin.org/get'
     url = 'https://ja3er.com/json'
     #url = 'https://127.0.0.1'
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36",}
-    r = sess.get(url,headers=headers)
+    r = sess.get('https://ja3er.com/json')
     print(r.text[:])
 
 
