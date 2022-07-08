@@ -55,3 +55,7 @@ b'GET /get HTTP/1.1\r\nHost: httpbin.org ...
 有什么bug, 或者好设计模式, 欢迎大家issues</br>
 本人vx号: ZanCoder,如果感兴趣和我一起学习开发吧
 
+# 附录
+    - tls1.2 https://www.rfc-editor.org/rfc/rfc5246.html
+    - tls1.2 https://www.rfc-editor.org/rfc/rfc8446.html
+
