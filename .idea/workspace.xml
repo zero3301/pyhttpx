@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d5f40bf2-b3cd-4ad5-b25f-7f4a0961acdd" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.pypirc" beforeDir="false" afterPath="$PROJECT_DIR$/.pypirc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

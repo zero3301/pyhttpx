@@ -64,7 +64,7 @@ params
 
 tls_ciphers: 密码套件
 
-exts: 扩展
+exts: 扩展类型
 
 exts_payload: 需要填充的扩展数据,不包括数据长度
 ```
@@ -105,4 +105,5 @@ exts_payload: 需要填充的扩展数据,不包括数据长度
  
 
 ### 如果对你有帮助,可以请我喝杯咖啡哟
-![Image](https://github.com/zero3301/pyhttpx/blob/main/image/wechat.png)
+
+<img src="https://github.com/zero3301/pyhttpx/blob/main/image/wechat.png"  height="330" width="495">
