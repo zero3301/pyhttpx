@@ -37,23 +37,28 @@ class X25519:
         """
         pms = x1.exchange(x2.public_key())
         pms2 = x2.exchange(x1.public_key())
-        print('pms',pms)
-        print( pms == pms2)
+
+        assert pms == pms2
 
 
 class ECDHE:
     #curvename='secp256r1'协商共享密钥
     def __init__(self,curvename):
         self.curvename = curvename
-
-        self.curve = ec.SECP256R1()
+        #self.curve = ec.SECP256R1()
+        self.curve = {
+            0x0017: ec.SECP256R1(),
+            0x0018: ec.SECP384R1(),
+            0x0019: ec.SECP521R1(),
+        }.get(self.curvename)
 
         self.client_kx_privkey = ec.generate_private_key(self.curve,backend=default_backend())
 
 
+
     def create(self):
-        private = 84415227458779726660992473430064037894301106473964382056643694469597835968918
         #临时私钥
+        private = 84415227458779726660992473430064037894301106473964382056643694469597835968918
         client_kx_privkey = ec.generate_private_key(self.curve, private)
         #生成固定私钥
         client_kx_privkey = ec.derive_private_key(private,self.curve,default_backend())
@@ -105,49 +110,15 @@ class ECDHE:
 
 class CryptoContextFactory:
     crypto_container = {
-            'x25519': X25519(),
-            'secp256r1': ECDHE('secp256r1'),
+            0x001d: X25519(),
+            0x0017: ECDHE(0x0017),
+            0x0018: ECDHE(0x0018),
+            0x0019: ECDHE(0x0019),
     }
 
 if __name__ == '__main__':
     
-    curvename = 'secp256r1'
+    curvename = 0x0017
     ECDHE(curvename).test()
 
-    print('使用tinyec.ec secp256r1')
-    import tinyec.registry as ec_reg
-    import tinyec.ec as tinec
-    curve = ec_reg.get_curve('secp256r1')
-    
-    private = 84415227458779726660992473430064037894301106473964382056643694469597835968918
-    client_keypair = tinec.Keypair(curve, private)
-    server_keypair = tinec.Keypair(curve, private)
-    #client_keypair = tinec.make_keypair(curve)
-    #server_keypair = tinec.make_keypair(curve)
-    point = client_keypair.pub
-    x, y = hex(point.x)[2:].rjust(64, '0'), hex(point.y)[2:].rjust(64, '0')
-    pubkey = "%s%s" % (x, y)
-    publickey_bytes = b'\x04' + bytes.fromhex(pubkey)
-    pms1 = tinec.ECDH(client_keypair).get_secret(server_keypair)
-    
-    
-    _point = (
-    int(publickey_bytes[1:33].hex(), 16),
-    int(publickey_bytes[33:].hex(), 16),
-    )
-    
-    point = tinec.Point(curve, *_point)
-    client_keypair = tinec.Keypair(curve, None, point)
-    secret_point = tinec.ECDH(server_keypair).get_secret(client_keypair)
 
-    point = hex(secret_point.x)[2:]
-    if len(point) % 2 == 1:
-        point = '0' + point
-    pms = bytes.fromhex(point)
-    point = client_keypair.pub
-    x, y = hex(point.x)[2:].rjust(64, '0'), hex(point.y)[2:].rjust(64, '0')
-    pubkey = "%s%s" % (x, y)
-    publickey_bytes = b'\x04' + bytes.fromhex(pubkey)
-
-    print('预主密钥',len(pms),pms)
-    print('临时公钥',publickey_bytes)

@@ -2,23 +2,18 @@
 import json
 import inspect
 import platform
-
+import sys
 
 
 
 from urllib.parse import urlencode
 
-from pyrequests.compat import *
-from pyrequests.models import Request
-from pyrequests.utils import default_headers
+from pyhttpx.compat import *
+from pyhttpx.models import Request
+from pyhttpx.utils import default_headers
+from pyhttpx.exception import ConnectionClosed
 
-# if platform.system().lower() == 'linux':
-#     from pyrequests.layers.tls.linux.tls_session import TlsSession
-# else:
-#     from pyrequests.layers.tls.window.tls_session import TlsSession
-
-
-from pyrequests.layers.tls.tls_session import TlsSession
+from pyhttpx.layers.tls.tls_session import TLSSocket
 
 
 class CookieJar(object):
@@ -33,6 +28,7 @@ class CookieManger(object):
         self.cookies = {}
     def set_cookie(self,req: Request, cookie: dict) ->None:
         addr = (req.host, req.port)
+
         if self.cookies.get(addr):
             self.cookies[addr].update(cookie)
         else:
@@ -41,12 +37,13 @@ class CookieManger(object):
         return self.cookies.get(k ,{})
 
 class HttpSession(object):
-    def __init__(self, ja3=None, **kwargs):
+    def __init__(self, **kwargs):
         self.tls_session = None
         self.cookie_manger = CookieManger()
         self.active_addr = None
         self.tlss = {}
-        self.ja3 = ja3
+        self.kw = {}
+        self.kw.update(kwargs)
 
     def handle_cookie(self, req, set_cookies):
         #
@@ -56,17 +53,20 @@ class HttpSession(object):
         if isinstance(set_cookies, str):
             for set_cookie in set_cookies.split(';'):
                 k, v = set_cookie.split('=', 1)
+                k,v = k.strip(),v.strip()
                 c[k] = v
         elif isinstance(set_cookies, list):
             for set_cookie in set_cookies:
                 k, v = set_cookie.split(';')[0].split('=', 1)
+                k, v = k.strip(), v.strip()
                 c[k] = v
         elif isinstance(set_cookies, dict):
             c.update(set_cookies)
+
         self.cookie_manger.set_cookie(req,c)
 
 
-    def request(self, method, url,
+    def request(self, method, url,update_cookies=True,timeout=None,proxies=None,
                 params=None, data=None, headers=None, cookies=None,json=None):
         req = Request(
             method=method.upper(),
@@ -76,6 +76,8 @@ class HttpSession(object):
             json=json,
             cookies=cookies or {},
             params=params or {},
+            timeout=timeout,
+            proxies=proxies,
 
         )
 
@@ -91,16 +93,17 @@ class HttpSession(object):
 
         send_kw  = {}
         if _cookies:
-            send_kw['Cookie'] = ';'.join('{}={}'.format(k,v) for k,v in _cookies.items())
+            send_kw['Cookie'] = '; '.join('{}={}'.format(k,v) for k,v in _cookies.items())
         self.req = req
         msg = self.prep_request(req, send_kw)
-        resp = self.send(req, msg)
+        resp = self.send(req, msg, update_cookies)
         return resp
 
     def prep_request(self, req, send_kw) -> bytes:
         msg = b'%s %s HTTP/1.1\r\n' % (req.method.encode(), req.path.encode())
         msg += b'Host: %s\r\n' % req.host.encode()
         dh = default_headers()
+
         dh.update(req.headers)
         dh.update(send_kw)
 
@@ -111,7 +114,7 @@ class HttpSession(object):
         if req.method == 'POST':
             if req.data:
                 if isinstance(req.data, str):
-                    req_body = req.data.encode()
+                    req_body = req.data
 
                 elif isinstance(req.data, dict):
                     # Content-Type: application/x-www-form-urlencoded\r\n
@@ -135,7 +138,7 @@ class HttpSession(object):
 
         return msg
 
-    def send(self, req, msg):
+    def send(self, req, msg, update_cookies):
 
 
         addr  = (req.host, req.port)
@@ -143,25 +146,23 @@ class HttpSession(object):
         if self.tlss.get(addr):
             self.tls_session = self.tlss[addr]
         else:
-            self.tlss[addr] = TlsSession(ja3=self.ja3)
+            self.tlss[addr] = TLSSocket(**self.kw)
             self.tls_session = self.tlss[addr]
-        if self.tls_session.isclosed:
-            self.tls_session.connect(host=self.req.host, port=self.req.port)
 
-        if not self.tls_session.isclosed:
-            #self.tls_session.get(self.req.path, self.req.host)
-            result = self.tls_session.send(msg)
-            if not result:
-                #报错
-                del self.tlss[addr]
-                return self.send(req, msg)
-            response = self.tls_session.response
-            response.request = req
-            response.request.raw = msg
-            if response.headers:
-                self.handle_cookie(req, response.headers.get('Set-Cookie'))
-            response.cookies = response.headers.get('Set-Cookie', {})
-            return response
+        if self.tls_session.isclosed:
+            self.tls_session.connect(
+                host=self.req.host, port=self.req.port,
+                proxies=req.proxies,timeout=req.timeout)
+
+        self.tls_session.send(msg)
+
+        response = self.tls_session.response
+        response.request = req
+        response.request.raw = msg
+        if response.headers and update_cookies:
+            self.handle_cookie(req, response.headers.get('Set-Cookie'))
+        response.cookies = response.headers.get('Set-Cookie', {})
+        return response
 
     @property
     def cookies(self):
@@ -169,7 +170,6 @@ class HttpSession(object):
         return _cookies
     def get(self, url, **kwargs):
         return self.request('GET', url, **kwargs)
-
 
     def post(self,url, **kwargs):
         return self.request('POST', url, **kwargs)
@@ -179,20 +179,6 @@ class HttpSession(object):
         return self.tls_session.response.content
 
 
-if __name__ == '__main__':
-    import pprint
-    import time
-    import random
-
-    ja3 = [0,65281, 10 ,11,35,13172,16,5,13]
-    #random.shuffle(ja3)
-    sess = HttpSession(ja3=ja3)
-    url = 'https://httpbin.org/get'
-    url = 'https://ja3er.com/json'
-    #url = 'https://127.0.0.1'
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36",}
-    r = sess.get('https://ja3er.com/json')
-    print(r.text[:])
 
 
 

@@ -35,8 +35,8 @@ class HelloClient:
         self.version = b'\x03\x01'
         self.length = None
         self.hanshake = HandshakeClientHello(ciphersuites, extensions)
-        self.hanshake_data = self.hanshake.dump()
+        self.hd = self.hanshake.dump()
 
     def dump(self,sc):
-        sc.verify_data.append(self.hanshake_data)
-        return self.contentType + self.version + struct.pack('!H',len(self.hanshake_data)) + self.hanshake_data
+        sc.handshake_data.append(self.hd)
+        return self.contentType + self.version + struct.pack('!H',len(self.hd)) + self.hd

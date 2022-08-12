@@ -3,7 +3,6 @@ import json
 from collections import OrderedDict,defaultdict
 
 from urllib.parse import urlparse,urlencode,quote,unquote
-
 import urllib.parse as parse
 
 
@@ -12,13 +11,10 @@ def encodeURI(url):
     url = unquote(url)
     return quote(url,safe='!@#$&*()=:/;?+\'"')
 
-
-
-
 class Request(object):
     def __init__(self,
-                 method=None, url=None, headers=None, data=None,
-                 params=None, auth=None, cookies=None,json=None):
+                 method=None, url=None, headers=None, data=None,timeout=None,
+                 params=None, auth=None, cookies=None,json=None,proxies=None):
         # Default empty dicts for dict params.
         data = [] if data is None else data
         headers = {} if headers is None else headers
@@ -33,7 +29,8 @@ class Request(object):
         self.auth = auth
         self.cookies = cookies
         self.parse_url = urlparse(url)
-
+        self.timeout = timeout
+        self.proxies = proxies
         self.host = self.parse_url.netloc
         self.port = 443
 
@@ -51,8 +48,6 @@ class Request(object):
 
         #url不编码字符
 
-        safe = ':/?:@&=+$'
-
         self.path = self.pre_path
         if self.params:
 
@@ -65,8 +60,6 @@ class Request(object):
     def __repr__(self):
         template = '<Request {method}>'
         return  template.format(method=self.method )
-
-
 
 
 
@@ -90,17 +83,17 @@ class Response(object):
         headers = defaultdict(list)
 
         protocol_raw,headers_raw = buffer[0],buffer[1:]
-        self.status_code = protocol_raw.split(' ')[1]
+        self.status_code = int(protocol_raw.split(' ')[1])
 
         for head in headers_raw:
             k,v = head.split(': ', 1)
-            #print(k,v)
+            k,v = k.lower(),v.lower()
+
             if k == 'Set-Cookie':
-                headers[k].append(v)
+                headers[k.lower()].append(v.lower())
             else:
                 headers[k.strip()] = v.strip()
-
-        if not headers.get('Connection'):
+        if not headers.get('connection'):
             self.tls_ctx.isclosed = True
         return headers
 
@@ -109,12 +102,11 @@ class Response(object):
         if not self.headers and b'\r\n\r\n' in self.plaintext_buffer:
             header_buffer,self.plaintext_buffer = self.plaintext_buffer.split(b'\r\n\r\n', 1)
             self.headers = self.handle_headers(header_buffer)
-            self.content_length = int(self.headers.get('Content-Length', 0))
+            self.content_length = int(self.headers.get('content-length', 0))
 
 
         if self.headers:
-
-            if self.transfer_encoding == self.headers.get('Transfer-Encoding'):
+            if self.transfer_encoding == self.headers.get('transfer-encoding'):
                 #chunked
                 if self.plaintext_buffer.endswith(b'0\r\n\r\n'):
 
@@ -130,11 +122,10 @@ class Response(object):
 
     @property
     def content(self):
-
         if self._content:
             return self._content
         else:
-            if self.headers.get('Transfer-Encoding') == self.transfer_encoding :
+            if self.headers.get('transfer-encoding') == self.transfer_encoding :
                 str_chunks = self.body
                 html = b''
                 m = memoryview(str_chunks)
@@ -151,7 +142,7 @@ class Response(object):
                 self._content = html
             else:
                 self._content = self.body
-        self._content = gzip.decompress(self._content) if  self.headers.get('Content-Encoding')   else self._content
+        self._content = gzip.decompress(self._content) if  self.headers.get('content-encoding')   else self._content
         return self._content
 
     @property
@@ -161,6 +152,7 @@ class Response(object):
     @property
     def json(self):
         return json.loads(self.text)
+
     def __repr__(self):
         template = '<Response status_code={status_code}>'
         return  template.format(status_code=self.status_code)
