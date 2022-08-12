@@ -106,4 +106,4 @@ exts_payload: 需要填充的扩展数据,不包括数据长度
 
 ### 如果对你有帮助,可以请我喝杯咖啡哟
 
-<img src="https://github.com/zero3301/pyhttpx/blob/main/image/wechat.png"  height="330" width="495">
+<img src="https://github.com/zero3301/pyhttpx/blob/main/image/wechat.png"  height="275" width="376">
