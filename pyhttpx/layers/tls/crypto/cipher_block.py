@@ -1,5 +1,5 @@
 
-import six
+
 import struct
 import os
 from cryptography.hazmat.primitives.ciphers import (Cipher, algorithms, modes,  # noqa: E501
@@ -27,7 +27,7 @@ class _BlockCipherMetaclass(type):
         return the_class
 
 
-class _BlockCipher(six.with_metaclass(_BlockCipherMetaclass, object)):
+class _BlockCipher(metaclass=_BlockCipherMetaclass):
     type = "block"
 
     def _tls_padding(self, data):

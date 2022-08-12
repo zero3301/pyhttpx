@@ -1,7 +1,6 @@
 
 
 import struct
-import six
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes  # noqa: E501
 from cryptography.hazmat.primitives.ciphers.aead import (AESGCM,
@@ -28,7 +27,7 @@ class AEADTagError(Exception):
     """
     pass
 
-class _AEADCipher(six.with_metaclass(_AEADCipherMetaclass, object)):
+class _AEADCipher(metaclass=_AEADCipherMetaclass):
     """
 
     """

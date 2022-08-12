@@ -1,5 +1,5 @@
 import struct
-import six
+
 import random
 from typing import Generic,TypeVar
 
@@ -12,7 +12,7 @@ class ExtensionMetaclass(type):
         return new_cls
 
 
-class _BaseExtension(six.with_metaclass(ExtensionMetaclass)):
+class _BaseExtension(metaclass=ExtensionMetaclass):
 
     def __bytes__(self):
         return b''

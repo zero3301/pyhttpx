@@ -43,14 +43,15 @@ class TLSSocket():
     def isclosed(self, value):
         setattr(self, '_closed', value)
 
-    def connect(self, host, port, proxies=None, timeout=0):
+    def connect(self, host, port, proxies=None, timeout=None):
         self.servercontext = ServerContext()
         self.tls_cxt = TLSSessionCtx()
         self.tls_cxt.handshake_data = []
         self.host, self.port = host, port
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.timeout = timeout
+
+        self.timeout = timeout or 0
         if proxies:
 
             self.socket = SocketProxy()
@@ -60,7 +61,7 @@ class TLSSocket():
         try:
             self.socket.connect((host, port))
 
-        except ConnectionRefusedError:
+        except (ConnectionRefusedError,TimeoutError,socket.timeout):
             raise ConnectionTimeout('无法连接 %s:%s' % (self.host, self.port))
 
         else:
@@ -82,7 +83,7 @@ class TLSSocket():
         while True:
             try:
                 recv = self.socket.recv(6324)
-                #ConnectionResetError
+
             except (ConnectionRefusedError,ConnectionResetError,socket.timeout):
                 raise ConnectionTimeout('无法连接 %s:%s' % (self.host, self.port))
             #socket.timeout
@@ -155,7 +156,9 @@ class TLSSocket():
         cache = b''
 
         while True:
-            self.socket.settimeout(self.timeout)
+            #timeout=0,会设置非阻塞
+            self.timeout > 0 and self.socket.settimeout(self.timeout)
+
             try:
                 recv = self.socket.recv(6324)
             except socket.timeout:

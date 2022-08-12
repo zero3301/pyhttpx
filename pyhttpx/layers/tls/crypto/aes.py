@@ -67,7 +67,6 @@ class AES_CBC:
 
 if __name__ == '__main__':
     import os
-    import time
 
     aes = AES_GCM()
     k = b'1' * 16
@@ -76,15 +75,8 @@ if __name__ == '__main__':
 
     p = b'abc'
     c=aes.encrypt(k, n,p,a)
-
     aes.decrypt(k,n,c,a)
-    cbc = AES_CBC()
 
-    key = b'\xdd\xf2\xff\xf1\xeetT$\xeam\x850\rN\x150'
-    iv = bytes.fromhex('3d683976b0f5ce230a6ba03cdb8af807')
-
-    c = cbc.encrypt(key,iv,b'abc')
-    print(cbc.decrypt(key,iv,c))
 
 
 

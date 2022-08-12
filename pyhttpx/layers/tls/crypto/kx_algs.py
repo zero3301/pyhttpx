@@ -1,4 +1,4 @@
-import six
+
 
 _tls_kx_algs = {}
 
@@ -21,7 +21,7 @@ class _GenericKXMetaclass(type):
 
 
 
-class _GenericKX(six.with_metaclass(_GenericKXMetaclass)):
+class _GenericKX(metaclass=_GenericKXMetaclass):
     pass
 
 class KX_RSA(_GenericKX):
