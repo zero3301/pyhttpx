@@ -33,7 +33,7 @@ if __name__ == '__main__':
     sess = pyhttpx.HttpSession()
     r = sess.get(url)
     print(r.text)
-    #![Image](https://github.com/zero3301/pyhttpx/blob/main/image/wechat.png)
+
 
 
 
