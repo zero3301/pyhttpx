@@ -95,15 +95,12 @@ exts_payload: 需要填充的扩展数据,不包括数据长度
 
 
 
-# 关于pyhttpx
-有什么bug, 或者好设计模式, 欢迎大家issues</br>
-
-
 ### 附录tls相关资料
    [tls1.2](https://www.rfc-editor.org/rfc/rfc5246.html)  
    [tls1.3](https://www.rfc-editor.org/rfc/rfc8446.html)
  
+### end
+有什么bug, 或者好设计模式, 欢迎大家issues</br>
 
-### 如果对你有帮助,可以请我喝杯咖啡哟
-
-<img src="https://github.com/zero3301/pyhttpx/blob/main/image/wechat.png"  height="275" width="376">
+如果对你有帮助,可以请我喝杯咖啡哟
+<img src="https://github.com/zero3301/pyhttpx/blob/main/image/wechat.png"  height="600" width="821">
