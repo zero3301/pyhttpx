@@ -104,5 +104,5 @@ exts_payload: 需要填充的扩展数据,不包括数据长度
    [tls1.3](https://www.rfc-editor.org/rfc/rfc8446.html)
  
 
-### 123
-![图片备注](https://github.com/zero3301/pyhttpx/tree/main/pyhttpx/imgae/wechat.png)
+### 如果对你有帮助,可以请我喝杯咖啡哟
+![Image](https://github.com/zero3301/pyhttpx/blob/main/image/wechat.png)
