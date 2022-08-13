@@ -17,6 +17,6 @@ setup(
     packages = find_packages(),
     include_package_data = False,
     platforms = "any",
-    install_requires = ["cryptography", "rsa", "pyOpenSSL"]
+    install_requires = ["cryptography==36.0.1", "rsa==4.8", "pyOpenSSL==21.0.0"]
 
 )
