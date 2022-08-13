@@ -116,9 +116,7 @@ exts_payload: 需要填充的扩展数据,不包括数据长度
 
 如果对你有帮助,可以请我喝杯咖啡哟
 
-![Image](https://github.com/zero3301/pyhttpx/blob/main/image/wechat.png)
+ ![Image](https://github.com/zero3301/pyhttpx/blob/main/image/wechat.png)
 
 
-![Image2](https://gitee.com/zero3301/pyhttpx/raw/main/image/wechat.png)
-
-<img src="https://gitee.com/zero3301/pyhttpx/raw/main/image/wechat.png" width="400" height="546" alt="wechat"/>
+ ![ts-node result](https://file.qingflow.com/documents/form/attach/35efbb5c-b704-4ac6-9074-8adc2f0ef9df.png)
