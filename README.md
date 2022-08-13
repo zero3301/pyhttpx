@@ -119,4 +119,6 @@ exts_payload: 需要填充的扩展数据,不包括数据长度
 ![Image](https://github.com/zero3301/pyhttpx/blob/main/image/wechat.png)
 
 
-![Image](https://gitee.com/zero3301/pyhttpx/raw/main/image/wechat.png)
+![Image2](https://gitee.com/zero3301/pyhttpx/raw/main/image/wechat.png)
+
+<img src="https://gitee.com/zero3301/pyhttpx/raw/main/image/wechat.png" width="400" height="546" alt="wechat"/>
