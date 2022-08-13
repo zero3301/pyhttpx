@@ -1,6 +1,4 @@
 
-
-
 import json
 import inspect
 import platform
@@ -15,10 +13,10 @@ import logging
 
 
 from urllib.parse import urlencode
+
 from pyhttpx.compat import *
 from pyhttpx.models import Request
 from pyhttpx.utils import default_headers
-
 from pyhttpx.layers.tls.tls_session import TLSSocket
 
 log = logging.getLogger(__name__)
@@ -210,8 +208,8 @@ class HttpSession(object):
         response.request = req
         response.request.raw = msg
         if response.headers and update_cookies:
-            self.handle_cookie(req, response.headers.get('Set-Cookie'))
-        response.cookies = response.headers.get('Set-Cookie', {})
+            self.handle_cookie(req, response.headers.get('set-cookie'))
+        response.cookies = response.headers.get('set-cookie', {})
 
         self._content = response.content
         if not conn.isclosed:
