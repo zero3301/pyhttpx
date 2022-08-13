@@ -2,16 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d5f40bf2-b3cd-4ad5-b25f-7f4a0961acdd" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/mysocket.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/mysocket.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyhttpx/exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/exception.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/crypto/cipher_aead.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/crypto/cipher_aead.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/keyexchange.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/keyexchange.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/suites.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/suites.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/tls_context.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/tls_context.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/tls_session.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/tls_session.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyhttpx/session.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/session.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test_requests.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_requests.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -205,22 +198,22 @@
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
     <state x="610" y="211" key="FileChooserDialogImpl/0.0.2048.1112@0.0.2048.1112" timestamp="1660318363231" />
-    <state width="2049" height="493" key="GridCell.Tab.0.bottom" timestamp="1660380303647">
+    <state width="2049" height="535" key="GridCell.Tab.0.bottom" timestamp="1660381223519">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="2049" height="493" key="GridCell.Tab.0.bottom/0.0.2048.1112@0.0.2048.1112" timestamp="1660380303647" />
-    <state width="2049" height="493" key="GridCell.Tab.0.center" timestamp="1660380303647">
+    <state width="2049" height="535" key="GridCell.Tab.0.bottom/0.0.2048.1112@0.0.2048.1112" timestamp="1660381223519" />
+    <state width="2049" height="535" key="GridCell.Tab.0.center" timestamp="1660381223519">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="2049" height="493" key="GridCell.Tab.0.center/0.0.2048.1112@0.0.2048.1112" timestamp="1660380303647" />
-    <state width="2049" height="493" key="GridCell.Tab.0.left" timestamp="1660380303646">
+    <state width="2049" height="535" key="GridCell.Tab.0.center/0.0.2048.1112@0.0.2048.1112" timestamp="1660381223519" />
+    <state width="2049" height="535" key="GridCell.Tab.0.left" timestamp="1660381223519">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="2049" height="493" key="GridCell.Tab.0.left/0.0.2048.1112@0.0.2048.1112" timestamp="1660380303646" />
-    <state width="2049" height="493" key="GridCell.Tab.0.right" timestamp="1660380303647">
+    <state width="2049" height="535" key="GridCell.Tab.0.left/0.0.2048.1112@0.0.2048.1112" timestamp="1660381223519" />
+    <state width="2049" height="535" key="GridCell.Tab.0.right" timestamp="1660381223519">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="2049" height="493" key="GridCell.Tab.0.right/0.0.2048.1112@0.0.2048.1112" timestamp="1660380303647" />
+    <state width="2049" height="535" key="GridCell.Tab.0.right/0.0.2048.1112@0.0.2048.1112" timestamp="1660381223519" />
     <state x="333" y="98" key="SettingsEditor" timestamp="1660328594328">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>

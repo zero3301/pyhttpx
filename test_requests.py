@@ -25,7 +25,7 @@ if __name__ == '__main__':
     tls_ciphers = [49195, 49199, 52392, 52393, 49196, 49200, 49162, 49161, 49171, 49172, 156, 157, 47, 53]
     random.shuffle(tls_ciphers)
     exts = [0, 65281, 10, 11, 35, 13172, 16, 5, 13, 222]
-    exts_payload = {0x33: '\x01'}
+    exts_payload = {222: '\x01'}
     sess = pyhttpx.HttpSession(tls_ciphers=tls_ciphers,exts=exts,exts_payload=exts_payload)
     r = sess.get(url)
     print(r.json)

@@ -8,7 +8,6 @@ $ python -m pip install requests
 ```
 
 **安装依赖**
-测试版本python3.7.5
 
 requirement.txt
 
@@ -65,8 +64,8 @@ b'GET /get HTTP/1.1\r\nHost: httpbin.org ...
 
 当然了你也可以添加一些随机数,如果你有足够把握的话
 
-params
 
+HttpSession 参数说明
 tls_ciphers: 密码套件
 
 exts: 扩展类型
@@ -74,9 +73,8 @@ exts: 扩展类型
 exts_payload: 需要填充的扩展数据,不包括数据长度
 ```
 >>>tls_ciphers = [49195, 49199, 52392, 52393, 49196, 49200, 49162, 49161, 49171, 49172, 156, 157, 47, 53]
->>>random.shuffle(ja3)
->>>exts = [0, 65281, 10, 11, 35, 13172, 16, 5, 13, 222]
->>>exts_payload = {0x33: '\x01'}
+>>>exts = [0, 65281, 10, 11, 35, 13172, 16, 5, 13, 222]  #222是自定义的随机数类型
+>>>exts_payload = {222: '\x01'}
 >>>sess = pyhttpx.HttpSession(tls_ciphers=tls_ciphers,exts=exts,exts_payload=exts_payload)
 >>>r = sess.get('https://tls.peet.ws/api/all')
 >>>r.text
