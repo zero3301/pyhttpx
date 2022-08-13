@@ -11,8 +11,6 @@ import sys
 import importlib
 import threading
 
-from urllib.parse import urlparse
-
 from pyhttpx.layers.tls.keyexchange import ServerContext,ClientCpiherSpec,ClientKeyExchange
 from pyhttpx.layers.tls.handshake import HelloClient
 from pyhttpx.layers.tls.suites import CipherSuites
@@ -61,7 +59,7 @@ class TLSSocket():
         if self.proxies:
 
             self.socket = SocketProxy()
-            proxy_ip, proxy_port = urlparse(self.proxies['https']).path.split(':')
+            proxy_ip, proxy_port = self.proxies['https'].split(':')
             self.socket.set_proxy(SocketProxy.HTTP, proxy_ip, proxy_port,'hwq','123456')
 
         try:
@@ -163,7 +161,6 @@ class TLSSocket():
                 try:
                     send_num += 1
                     self.sendall(self.write_buff)
-                    #print(id(self.tls_cxt),'tlssession send',len(self.write_buff), self.write_buff)
                 except (ConnectionError):
                     self.connect()
                     if send_num > 3:
