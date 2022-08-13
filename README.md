@@ -117,3 +117,6 @@ exts_payload: 需要填充的扩展数据,不包括数据长度
 如果对你有帮助,可以请我喝杯咖啡哟
 
 ![Image](https://github.com/zero3301/pyhttpx/blob/main/image/wechat.png)
+
+
+![Image](https://gitee.com/zero3301/pyhttpx/raw/main/image/wechat.png)
