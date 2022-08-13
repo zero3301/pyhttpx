@@ -19,7 +19,7 @@ from pyhttpx.layers.tls.suites import (
 
 from pyhttpx.exception import TLSVerifyDataExpetion
 
-
+import threading
 
 class TLSContext(object):
 
@@ -83,7 +83,6 @@ class TLSSessionCtx(object):
         self.tls_version = b'\x03\x03'
 
     def encrypt(self, P, content_type):
-
         sequence = struct.pack('!Q', self.client_ctx.sequence)
         # 附加数据,记录层随机数 + b'\x16\x03\x03' + len(plaintext)
         A = sequence + content_type + self.tls_version + struct.pack('!H', len(P))
@@ -126,6 +125,7 @@ class TLSSessionCtx(object):
             self.hmac_alg = hashlib.sha256
 
         self.cls_cipher_alg = cipher_alg
+
         self.kx_alg = kx_alg
         self.hmac_alg = hmac_alg
         self.negotiated_premaster_secret()
@@ -141,11 +141,13 @@ class TLSSessionCtx(object):
         self.make_master_secret()
         self.key_expandsion()
 
+
         if cipher_type == 'aead':
             self.client_write_key = self.key_block[:key_len]
             self.server_write_key = self.key_block[key_len:key_len * 2]
             self.client_fixed_iv = self.key_block[key_len * 2:key_len * 2 + fixed_iv_len]
             self.server_fixed_iv = self.key_block[key_len * 2 + fixed_iv_len:key_len * 2 + fixed_iv_len * 2]
+            #print(f'{threading.current_thread().name} ,cxt id{id(self)} client_write_key = ',self.client_write_key)
 
 
         elif cipher_type == 'block':
@@ -171,6 +173,7 @@ class TLSSessionCtx(object):
     def key_expandsion(self):
         seed = b'key expansion' + self.server_ctx.random + self.client_ctx.random
         self.key_block = prf(self.master_secret, seed, self.hash_alg, outlen=256)
+
 
     def negotiated_premaster_secret(self):
 

@@ -2,6 +2,11 @@
 基于socket开发的一个网络测试库,供研究https/tls参考,
 如果你用过requests,它将会变得非常容易
 
+PyPI:
+```
+$ python -m pip install requests
+```
+
 **安装依赖**
 测试版本python3.7.5
 

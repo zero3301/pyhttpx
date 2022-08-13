@@ -9,6 +9,7 @@ import time
 import platform
 import sys
 import importlib
+import threading
 
 from urllib.parse import urlparse
 
@@ -22,18 +23,24 @@ from pyhttpx.layers.tls.tls_context import TLSSessionCtx
 
 from pyhttpx.models import Response
 
-from pyhttpx.exception import (TLSDecryptErrorExpetion,
-                                    ConnectionTimeout,ConnectionClosed,ReadTimeout
-                                  )
+from pyhttpx.exception import (
+    TLSDecryptErrorExpetion,
+    ConnectionTimeout,
+    ConnectionClosed,
+    ReadTimeout)
 
 from pyhttpx.layers.tls.socks import SocketProxy
 
 class TLSSocket():
-    def __init__(self, **kwargs):
+    def __init__(self, host, port,proxies=None, timeout=None, **kwargs):
         self.kw = {}
         self.kw.update(kwargs)
         self._closed = True
         self.timeout = 0
+        self.host = host
+        self.port = port
+        self.proxies = proxies
+        self.timeout = timeout
 
     @property
     def isclosed(self):
@@ -43,23 +50,22 @@ class TLSSocket():
     def isclosed(self, value):
         setattr(self, '_closed', value)
 
-    def connect(self, host, port, proxies=None, timeout=None):
+    def connect(self):
         self.servercontext = ServerContext()
         self.tls_cxt = TLSSessionCtx()
         self.tls_cxt.handshake_data = []
-        self.host, self.port = host, port
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        self.timeout = timeout or 0
-        if proxies:
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.timeout = self.timeout or 0
+        if self.proxies:
 
             self.socket = SocketProxy()
-            proxy_ip, proxy_port = urlparse(proxies['https']).path.split(':')
+            proxy_ip, proxy_port = urlparse(self.proxies['https']).path.split(':')
             self.socket.set_proxy(SocketProxy.HTTP, proxy_ip, proxy_port,'hwq','123456')
 
         try:
-            self.socket.connect((host, port))
+            self.socket.connect((self.host, self.port))
 
         except (ConnectionRefusedError,TimeoutError,socket.timeout):
             raise ConnectionTimeout('无法连接 %s:%s' % (self.host, self.port))
@@ -75,7 +81,7 @@ class TLSSocket():
         ciphersuites, extensions = CipherSuites(**self.kw).dump(),dump_extension(self.host, **self.kw)
         hello = HelloClient(ciphersuites, extensions)
         self.tls_cxt.client_ctx.random = hello.hanshake.random
-        self.socket.send(hello.dump(self.tls_cxt))
+        self.socket.sendall(hello.dump(self.tls_cxt))
 
         exchanage  = True
         cache =b''
@@ -106,7 +112,7 @@ class TLSSocket():
                             self.servercontext.load(flowtext)
 
                         if not exchanage and self.server_change_cipher_spec:
-                            #print('成功握手,server Encrypted Handshake Message')
+                            #print(threading.current_thread().name,'成功握手,server Encrypted Handshake Message')
                             # 验证服务器消息,Encrypted Handshake Message,效验密钥
 
                             server_verify_data = self.tls_cxt.decrypt(flowtext, b'\x16')
@@ -141,26 +147,42 @@ class TLSSocket():
                     verify_data = self.tls_cxt.get_verify_data()
                     ciphertext = self.tls_cxt.encrypt(verify_data, b'\x16')
                     encrypted_message = b'\x16' + b'\x03\x03' + struct.pack('!H', len(ciphertext )) + ciphertext
-                    self.socket.send(keychange + changecipherspec + encrypted_message)
+                    self.socket.sendall(keychange + changecipherspec + encrypted_message)
                     exchanage = False
 
+    def sendall(self, data):
+        try:
+            self.socket.sendall(data)
+        except ConnectionError as e:
+            pass
 
-    def send(self, plaintext):
-        #print('tlssession send',len(plaintext), plaintext)
+    def flush(self):
+        if self.write_buff:
+            send_num = 0
+            while True:
+                try:
+                    send_num += 1
+                    self.sendall(self.write_buff)
+                    #print(id(self.tls_cxt),'tlssession send',len(self.write_buff), self.write_buff)
+                except (ConnectionError):
+                    self.connect()
+                    if send_num > 3:
+                        raise ConnectionError('Reconnect more than %s' % send_num)
+                else:
+                    break
 
-        self.response = Response(tls_ctx=self)
-        ciphertext = self.tls_cxt.encrypt(plaintext, b'\x17')
-        encrypted_message = b'\x17' + b'\x03\x03' + struct.pack('!H', len(ciphertext)) + ciphertext
-        self.socket.send(encrypted_message)
+        self.write_buff = None
         self.plaintext_buffer_reader = []
         cache = b''
-
         while True:
             #timeout=0,会设置非阻塞
             self.timeout > 0 and self.socket.settimeout(self.timeout)
 
             try:
                 recv = self.socket.recv(6324)
+            except ConnectionAbortedError:
+                raise ConnectionAbortedError('ConnectionAbortedError')
+
             except socket.timeout:
                 raise ReadTimeout('timed out')
 
@@ -171,7 +193,7 @@ class TLSSocket():
 
             recv = cache + recv
             cache = b''
-            while recv and len(recv) >=5:
+            while recv and len(recv) >= 5:
                 handshake_type = struct.unpack('!B', recv[:1])[0]
                 length = struct.unpack('!H', recv[3:5])[0]
                 flowtext = recv[5:5 + length]
@@ -189,4 +211,11 @@ class TLSSocket():
                 elif handshake_type == 0x15:
                     self.isclosed = True
                     raise ConnectionClosed('Server Encrypted Alert')
+
+
+    def send(self, plaintext):
+        self.response = Response(tls_ctx=self)
+        ciphertext = self.tls_cxt.encrypt(plaintext, b'\x17')
+        self.write_buff = b'\x17' + b'\x03\x03' + struct.pack('!H', len(ciphertext)) + ciphertext
+        self.flush()
 

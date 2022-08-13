@@ -9,9 +9,7 @@ from pyhttpx.layers.tls.suites import TLS_SUITES
 from pyhttpx.exception import (TLSECCNotSupportedErrorExpetion,
                                   TLSCipherNotSupportedErrorExpetion)
 
-class SessionContext:
-    def __init__(self):
-        self.handshake_data=  []
+
 
 class ServerStore:
     def __init__(self):

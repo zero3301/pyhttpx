@@ -2,8 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d5f40bf2-b3cd-4ad5-b25f-7f4a0961acdd" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/mysocket.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/mysocket.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/image/wechat.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyhttpx/exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/exception.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/crypto/cipher_aead.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/crypto/cipher_aead.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/keyexchange.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/keyexchange.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/suites.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/suites.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/tls_context.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/tls_context.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/tls_session.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/tls_session.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyhttpx/session.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/session.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test_requests.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_requests.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -41,6 +49,48 @@
     </key>
   </component>
   <component name="RunManager" selected="Python.test_requests">
+    <configuration name="123" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="mysocket" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/123.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="cipher_aead" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="mysocket" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/pyhttpx/layers/tls/crypto" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/pyhttpx/layers/tls/crypto/cipher_aead.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="pkcs1" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="mysocket" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -54,48 +104,6 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/pyhttpx/layers/tls/crypto/pkcs1.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="session (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="mysocket" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/pyrequests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/pyrequests/session.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="session" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="mysocket" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/session.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -148,19 +156,19 @@
     </configuration>
     <list>
       <item itemvalue="Python.client" />
-      <item itemvalue="Python.session (1)" />
-      <item itemvalue="Python.session" />
       <item itemvalue="Python.test_requests" />
       <item itemvalue="Python.socks" />
       <item itemvalue="Python.pkcs1" />
+      <item itemvalue="Python.123" />
+      <item itemvalue="Python.cipher_aead" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.test_requests" />
+        <item itemvalue="Python.123" />
+        <item itemvalue="Python.cipher_aead" />
         <item itemvalue="Python.pkcs1" />
         <item itemvalue="Python.socks" />
-        <item itemvalue="Python.session (1)" />
-        <item itemvalue="Python.session" />
       </list>
     </recent_temporary>
   </component>
@@ -197,26 +205,26 @@
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
     <state x="610" y="211" key="FileChooserDialogImpl/0.0.2048.1112@0.0.2048.1112" timestamp="1660318363231" />
-    <state width="2049" height="454" key="GridCell.Tab.0.bottom" timestamp="1660318993332">
+    <state width="2049" height="493" key="GridCell.Tab.0.bottom" timestamp="1660380303647">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="2049" height="454" key="GridCell.Tab.0.bottom/0.0.2048.1112@0.0.2048.1112" timestamp="1660318993332" />
-    <state width="2049" height="454" key="GridCell.Tab.0.center" timestamp="1660318993331">
+    <state width="2049" height="493" key="GridCell.Tab.0.bottom/0.0.2048.1112@0.0.2048.1112" timestamp="1660380303647" />
+    <state width="2049" height="493" key="GridCell.Tab.0.center" timestamp="1660380303647">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="2049" height="454" key="GridCell.Tab.0.center/0.0.2048.1112@0.0.2048.1112" timestamp="1660318993331" />
-    <state width="2049" height="454" key="GridCell.Tab.0.left" timestamp="1660318993331">
+    <state width="2049" height="493" key="GridCell.Tab.0.center/0.0.2048.1112@0.0.2048.1112" timestamp="1660380303647" />
+    <state width="2049" height="493" key="GridCell.Tab.0.left" timestamp="1660380303646">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="2049" height="454" key="GridCell.Tab.0.left/0.0.2048.1112@0.0.2048.1112" timestamp="1660318993331" />
-    <state width="2049" height="454" key="GridCell.Tab.0.right" timestamp="1660318993331">
+    <state width="2049" height="493" key="GridCell.Tab.0.left/0.0.2048.1112@0.0.2048.1112" timestamp="1660380303646" />
+    <state width="2049" height="493" key="GridCell.Tab.0.right" timestamp="1660380303647">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="2049" height="454" key="GridCell.Tab.0.right/0.0.2048.1112@0.0.2048.1112" timestamp="1660318993331" />
-    <state x="333" y="98" key="SettingsEditor" timestamp="1656833015950">
+    <state width="2049" height="493" key="GridCell.Tab.0.right/0.0.2048.1112@0.0.2048.1112" timestamp="1660380303647" />
+    <state x="333" y="98" key="SettingsEditor" timestamp="1660328594328">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state x="333" y="98" key="SettingsEditor/0.0.2048.1112@0.0.2048.1112" timestamp="1656833015950" />
+    <state x="333" y="98" key="SettingsEditor/0.0.2048.1112@0.0.2048.1112" timestamp="1660328594328" />
     <state x="451" y="178" width="755" height="548" key="find.popup" timestamp="1656833088778">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>

@@ -16,7 +16,8 @@ class TLSCipherNotSupportedErrorExpetion(BaseExpetion):
 class TLSECCNotSupportedErrorExpetion(BaseExpetion):
     pass
 
-
+class ConnectionAbortedError(BaseExpetion,):
+    pass
 class ConnectionTimeout(BaseExpetion):
     pass
 

@@ -129,5 +129,11 @@ if __name__ == '__main__':
     c=b'\x00\x00\x00\x00\x00\x00\x00\x00\xcb\x8e\xd1V\xdf`\xdf\xd4HLFiS\x1c\xe9=~1KB\xc8\xb8\x8e\x84lJ\xe5w\xedi^\xd3'
     a=b'\x00\x00\x00\x00\x00\x00\x00\x00\x16\x03\x03\x00\x10'
     seq = b'\x00' * 8
-    p = gcm.decrypt(c, a, seq)
-    print(p)
+    #p = gcm.decrypt(c, a, seq)
+    #print(p)
+    print(gcm.key)
+    k = bytes.fromhex('11166448527a4c23940f637b2248552e')
+    fixed = bytes.fromhex('93ca96d0')
+    gcm2 = Cipher_AES_128_GCM(k, fixed)
+
+    print(gcm2.key)

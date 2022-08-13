@@ -1,20 +1,27 @@
 
+
+
 import json
 import inspect
 import platform
 import sys
+import time
 
+from queue import LifoQueue
+import queue
+from threading import RLock
+import threading
+import logging
 
 
 from urllib.parse import urlencode
-
 from pyhttpx.compat import *
 from pyhttpx.models import Request
 from pyhttpx.utils import default_headers
-from pyhttpx.exception import ConnectionClosed
 
 from pyhttpx.layers.tls.tls_session import TLSSocket
 
+log = logging.getLogger(__name__)
 
 class CookieJar(object):
     __slots__ = ('name', 'value', 'expires', 'max_age', 'path', 'domain')
@@ -36,14 +43,57 @@ class CookieManger(object):
     def get(self, k):
         return self.cookies.get(k ,{})
 
+class HTTPSConnectionPool:
+    scheme = "https"
+    maxsize = 100
+    def __init__(self,req, **kwargs):
+        self.host = kwargs['host']
+        self.port = kwargs['port']
+
+        self.poolconnections = LifoQueue(maxsize=self.maxsize)
+        self.lock = RLock()
+        self.req = req
+    def _new_conn(self, **kwargs):
+
+        conn = TLSSocket(host=self.req.host, port=self.req.port,
+            proxies=self.req.proxies, timeout=self.req.timeout,**kwargs)
+        conn.connect()
+
+        return conn
+
+    def _get_conn(self, **kwargs):
+        conn = None
+        try:
+            conn = self.poolconnections.get(block=False)
+
+        except queue.Empty:
+            pass
+        return conn or self._new_conn(**kwargs)
+
+    def _put_conn(self, conn):
+        try:
+            self.poolconnections.put(conn, block=False)
+            return
+        except queue.Full:
+            # This should never happen if self.block == True
+            log.warning(
+                "Connection pool is full, discarding connection: %s. Connection pool size: %s",
+                '%s' % self.host,
+                self.maxsize,
+            )
+
+
 class HttpSession(object):
     def __init__(self, **kwargs):
         self.tls_session = None
         self.cookie_manger = CookieManger()
+
         self.active_addr = None
         self.tlss = {}
         self.kw = {}
         self.kw.update(kwargs)
+        self.lock = RLock()
+
 
     def handle_cookie(self, req, set_cookies):
         #
@@ -67,7 +117,7 @@ class HttpSession(object):
 
 
     def request(self, method, url,update_cookies=True,timeout=None,proxies=None,
-                params=None, data=None, headers=None, cookies=None,json=None):
+                params=None, data=None, headers=None, cookies=None,json=None,verify=False):
         req = Request(
             method=method.upper(),
             url=url,
@@ -140,28 +190,33 @@ class HttpSession(object):
 
     def send(self, req, msg, update_cookies):
 
-
         addr  = (req.host, req.port)
         self.active_addr = addr
+
         if self.tlss.get(addr):
-            self.tls_session = self.tlss[addr]
+            connpool = self.tlss[addr]
+            conn = connpool._get_conn()
+            tls_session = conn
+
         else:
-            self.tlss[addr] = TLSSocket(**self.kw)
-            self.tls_session = self.tlss[addr]
+            connpool = HTTPSConnectionPool(req,host=req.host,port=req.host)
+            self.tlss[addr] = connpool
+            conn = connpool._get_conn()
+            tls_session = conn
 
-        if self.tls_session.isclosed:
-            self.tls_session.connect(
-                host=self.req.host, port=self.req.port,
-                proxies=req.proxies,timeout=req.timeout)
+        tls_session.send(msg)
 
-        self.tls_session.send(msg)
-
-        response = self.tls_session.response
+        response = tls_session.response
         response.request = req
         response.request.raw = msg
         if response.headers and update_cookies:
             self.handle_cookie(req, response.headers.get('Set-Cookie'))
         response.cookies = response.headers.get('Set-Cookie', {})
+
+        self._content = response.content
+        if not conn.isclosed:
+            connpool._put_conn(conn)
+
         return response
 
     @property
@@ -176,7 +231,7 @@ class HttpSession(object):
 
     @property
     def content(self):
-        return self.tls_session.response.content
+        return self._content
 
 
 

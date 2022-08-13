@@ -8,7 +8,10 @@ CIPHER_SUITES = [
     0xc013, 0xc014, 0x009c, 0x009d,
     0x002f,0x0035
 ]
-
+# CIPHER_SUITES = [
+#
+#     0xc02b,0xc02f
+# ]
 TLS_SUITES = {
     0xc02b: {'name': 'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256','key_len': 16,
              'sha': 'sha256','type': 'aead','kct': 'ECDHE',},
