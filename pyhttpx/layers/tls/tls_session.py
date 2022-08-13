@@ -203,6 +203,7 @@ class TLSSocket():
                     plaintext = self.tls_cxt.decrypt(flowtext, b'\x17')
                     self.response.flush(plaintext)
                     if self.response.read_ended:
+
                         return True
 
                 elif handshake_type == 0x15:
