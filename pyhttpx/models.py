@@ -2,9 +2,9 @@ import gzip
 import json
 from collections import OrderedDict,defaultdict
 
-from urllib.parse import urlparse,urlencode,quote,unquote
-import urllib.parse as parse
+import brotli
 
+from urllib.parse import urlparse,urlencode,quote,unquote
 
 
 def encodeURI(url):
@@ -89,7 +89,7 @@ class Response(object):
             k,v = head.split(': ', 1)
             k,v = k.lower(),v.lower()
 
-            if k == 'Set-Cookie':
+            if k == 'set-cookie':
                 headers[k.lower()].append(v.lower())
             else:
                 headers[k.strip()] = v.strip()
@@ -100,6 +100,7 @@ class Response(object):
     def flush(self, buffer):
         self.plaintext_buffer += buffer
         if not self.headers and b'\r\n\r\n' in self.plaintext_buffer:
+            print(self.plaintext_buffer)
             header_buffer,self.plaintext_buffer = self.plaintext_buffer.split(b'\r\n\r\n', 1)
             self.headers = self.handle_headers(header_buffer)
             self.content_length = int(self.headers.get('content-length', 0))
@@ -142,7 +143,17 @@ class Response(object):
                 self._content = html
             else:
                 self._content = self.body
-        self._content = gzip.decompress(self._content) if  self.headers.get('content-encoding')   else self._content
+
+        content_encoding =  self.headers.get('content-encoding').lower()
+        if content_encoding == 'gzip':
+            self._content = gzip.decompress(self._content)
+
+        elif content_encoding == 'br':
+
+            self._content = brotli.decompress(self._content)
+
+        else:
+            self._content = self._content
         return self._content
 
     @property
