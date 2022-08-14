@@ -100,7 +100,6 @@ class Response(object):
     def flush(self, buffer):
         self.plaintext_buffer += buffer
         if not self.headers and b'\r\n\r\n' in self.plaintext_buffer:
-            print(self.plaintext_buffer)
             header_buffer,self.plaintext_buffer = self.plaintext_buffer.split(b'\r\n\r\n', 1)
             self.headers = self.handle_headers(header_buffer)
             self.content_length = int(self.headers.get('content-length', 0))
@@ -144,7 +143,7 @@ class Response(object):
             else:
                 self._content = self.body
 
-        content_encoding =  self.headers.get('content-encoding').lower()
+        content_encoding =  self.headers.get('content-encoding')
         if content_encoding == 'gzip':
             self._content = gzip.decompress(self._content)
 
