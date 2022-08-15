@@ -218,6 +218,7 @@ class HttpSession(object):
 
         self._content = response.content
         if not conn.isclosed:
+            print('add',conn)
             connpool._put_conn(conn)
 
         return response

@@ -181,6 +181,7 @@ class TLSSocket():
                 # 服务器不保持长连接,传输完毕断开连接
                 self.isclosed = True
                 read_ended = True
+
                 #raise ConnectionClosed('Server closes connection')
 
             recv = cache + recv
@@ -207,8 +208,16 @@ class TLSSocket():
                     self.isclosed = True
                     #raise ConnectionClosed('Server Encrypted Alert')
 
-        if self.isclosed:
-            self.socket.shutdown(1)
+        try:
+            recv = self.socket.settimeout(0.00001)
+            if not recv:
+                self.isclosed = True
+                self.socket.shutdown(1)
+        except:
+            pass
+
+
+
 
     def send(self, plaintext):
 
