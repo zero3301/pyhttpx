@@ -90,7 +90,7 @@ class TLSSocket():
 
             except (ConnectionRefusedError,ConnectionResetError,socket.timeout):
                 raise ConnectionTimeout('无法连接 %s:%s' % (self.host, self.port))
-            #socket.timeout
+
             recv = cache + recv
             cache = b''
 
@@ -158,7 +158,6 @@ class TLSSocket():
     def flush(self):
 
         self.sendall(self.write_buff)
-
         self.write_buff = None
         self.plaintext_buffer_reader = []
         cache = b''
@@ -168,7 +167,7 @@ class TLSSocket():
 
             #timeout=0,会设置非阻塞
             self.timeout > 0 and self.socket.settimeout(self.timeout)
-
+            self.socket.settimeout(None)
             try:
                 recv = self.socket.recv(6324)
             except ConnectionAbortedError:
@@ -201,6 +200,7 @@ class TLSSocket():
 
                     if self.response.read_ended:
                         #self.isclosed = False
+                        print(self.response.text[:100])
                         read_ended  = True
 
                 elif handshake_type == 0x15:
@@ -208,16 +208,22 @@ class TLSSocket():
                     self.isclosed = True
                     #raise ConnectionClosed('Server Encrypted Alert')
 
+
         try:
-            recv = self.socket.settimeout(0.00001)
+            #尝试获取fin包
+            self.socket.settimeout(0.0001)
+            recv = self.socket.recv(1024)
+
             if not recv:
+
                 self.isclosed = True
                 self.socket.shutdown(1)
-        except:
-            pass
 
-
-
+        except socket.timeout:
+            self.isclosed = False
+        finally:
+            self.socket.settimeout(None)
+            self.socket.setblocking(True)
 
     def send(self, plaintext):
 

@@ -87,12 +87,11 @@ class Response(object):
 
         for head in headers_raw:
             k,v = head.split(': ', 1)
-            k,v = k.lower(),v.lower()
-
+            k,v = k.lower().strip(),v.lower().strip()
             if k == 'set-cookie':
-                headers[k.lower()].append(v.lower())
+                headers[k].append(v)
             else:
-                headers[k.strip()] = v.strip()
+                headers[k] = v
 
         return headers
 

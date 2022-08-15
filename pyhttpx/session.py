@@ -202,11 +202,6 @@ class HttpSession(object):
         connpool, conn = self.get_conn(req, addr)
         result_status = conn.send(msg)
 
-        #服务器断开连接
-        if conn.isclosed:
-            connpool, conn = self.get_conn(req, addr)
-            result_status = conn.send(msg)
-
         response = conn.response
         response.request = req
         response.request.raw = msg
@@ -218,7 +213,7 @@ class HttpSession(object):
 
         self._content = response.content
         if not conn.isclosed:
-            print('add',conn)
+
             connpool._put_conn(conn)
 
         return response
