@@ -14,7 +14,7 @@ if __name__ == '__main__':
     }
     url = 'https://tls.peet.ws/api/all'
     url = 'https://127.0.0.1'
-
+    url = 'https://www.baidu.com'
     tls_ciphers = [49195, 49199, 52392, 52393, 49196, 49200, 49162, 49161, 49171, 49172, 156, 157, 47, 53,55]
     sess = pyhttpx.HttpSession(tls_ciphers=tls_ciphers)
     #random.shuffle(tls_ciphers)

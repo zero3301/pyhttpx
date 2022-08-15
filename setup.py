@@ -29,7 +29,7 @@ class PyTest(TestCommand):
 packages = find_packages()
 setup(
     name = "pyhttpx",   #这里是pip项目发布的名称
-    version = "1.1.8",  #版本号，数值大的会优先被pip
+    version = "1.1.9",  #版本号，数值大的会优先被pip
     keywords = ["pip", "pyhttpx"],			#关键字
     description = "HTTP library.",	#描述
     long_description = "3301's private utils.",

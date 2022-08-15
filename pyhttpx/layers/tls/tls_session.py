@@ -164,7 +164,8 @@ class TLSSocket():
         cache = b''
         read_ended = False
 
-        while (not read_ended or not self.isclosed):
+        while not read_ended:
+
             #timeout=0,会设置非阻塞
             self.timeout > 0 and self.socket.settimeout(self.timeout)
 
@@ -179,6 +180,7 @@ class TLSSocket():
             if not recv:
                 # 服务器不保持长连接,传输完毕断开连接
                 self.isclosed = True
+                read_ended = True
                 #raise ConnectionClosed('Server closes connection')
 
             recv = cache + recv
@@ -195,15 +197,15 @@ class TLSSocket():
                 if handshake_type == 0x17:
                     plaintext = self.tls_cxt.decrypt(flowtext, b'\x17')
                     self.response.flush(plaintext)
-                    if self.response.read_ended:
 
+                    if self.response.read_ended:
                         #self.isclosed = False
                         read_ended  = True
 
                 elif handshake_type == 0x15:
+                    read_ended = True
                     self.isclosed = True
                     #raise ConnectionClosed('Server Encrypted Alert')
-
 
         if self.isclosed:
             self.socket.shutdown(1)
