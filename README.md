@@ -5,7 +5,7 @@
 PyPI:
 ```
 $ python -m pip install --upgrade pip
-$ pip install pyhttpx
+$ python -m pip install pyhttpx
 ```
 
 **安装依赖**
@@ -16,6 +16,7 @@ requirement.txt
 cryptography==36.0.1
 rsa==4.8
 pyOpenSSL==21.0.0
+brotli==1.0.9
 
 ```
 
@@ -55,9 +56,9 @@ b'GET /get HTTP/1.1\r\nHost: httpbin.org ...
 
 ## 修改tls指纹
 
-内置ja3
+已经内置了firefox99的ja3:
 
-771,49195-49199-52392-52393-49196-49200-49162-49161-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-13-28,29-23-24-25,0
+771,49195-49199-52393-52392-49196-49200-49162-49161-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-13-28,29-23-24-25,0
 
 ### 补充说明
 
@@ -67,9 +68,13 @@ b'GET /get HTTP/1.1\r\nHost: httpbin.org ...
 
 当然了你也可以添加一些随机数,如果你有足够把握的话
 
+**如何禁用firefox的tls1.3**
+
+地址栏输入: about:config
+搜索tls,将值改为3即可
+如果firefox访问没问题,表示tls1.2也是可以访问的
 
 HttpSession 参数说明
-
 tls_ciphers: 密码套件
 
 exts: 扩展类型
