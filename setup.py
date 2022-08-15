@@ -29,7 +29,7 @@ class PyTest(TestCommand):
 packages = find_packages()
 setup(
     name = "pyhttpx",   #这里是pip项目发布的名称
-    version = "1.1.7",  #版本号，数值大的会优先被pip
+    version = "1.1.8",  #版本号，数值大的会优先被pip
     keywords = ["pip", "pyhttpx"],			#关键字
     description = "HTTP library.",	#描述
     long_description = "3301's private utils.",
@@ -39,8 +39,7 @@ setup(
     author = "zan3301",			# 作者
     author_email = "1114135928@qq.com",
     package_dir={"pyhttpx": "pyhttpx"},
-    #python_requires=">=3.7, <4",
-    #zip_safe=False,
+    zip_safe=False,
     # package_data={
     #     # 包含文件后缀,此时include_package_data = False,或者使用MANIFEST.in构建
     #     '': ['*.pyd', '*.so']},
@@ -54,17 +53,6 @@ setup(
 
 )
 
-
-
-
+#打包
 #python setup.py sdist
 #twine upload dist/pyhttpx-1.1.0.tar.gz
-
-
-"""
-include *.so *.pyd
-global-exclude *.so *.pyd
-global-exclude *.o *.obj
-global-exclude *.pyx
-global-exclude *.pyc __pycache__
-"""

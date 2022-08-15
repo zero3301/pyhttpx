@@ -2,11 +2,9 @@
 __pycache__/
 #不忽略
 *.py[cod]
-
 *$py.class
 
-docs
-
+.idea
 # C extensions
 *.so
 

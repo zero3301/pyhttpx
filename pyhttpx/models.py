@@ -93,8 +93,7 @@ class Response(object):
                 headers[k.lower()].append(v.lower())
             else:
                 headers[k.strip()] = v.strip()
-        if not headers.get('connection'):
-            self.tls_ctx.isclosed = True
+
         return headers
 
     def flush(self, buffer):

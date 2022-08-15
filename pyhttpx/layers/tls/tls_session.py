@@ -156,23 +156,15 @@ class TLSSocket():
             pass
 
     def flush(self):
-        if self.write_buff:
-            send_num = 0
-            while True:
-                try:
-                    send_num += 1
-                    self.sendall(self.write_buff)
-                except (ConnectionError):
-                    self.connect()
-                    if send_num > 3:
-                        raise ConnectionError('Reconnect more than %s' % send_num)
-                else:
-                    break
+
+        self.sendall(self.write_buff)
 
         self.write_buff = None
         self.plaintext_buffer_reader = []
         cache = b''
-        while True:
+        read_ended = False
+
+        while (not read_ended or not self.isclosed):
             #timeout=0,会设置非阻塞
             self.timeout > 0 and self.socket.settimeout(self.timeout)
 
@@ -187,7 +179,6 @@ class TLSSocket():
             if not recv:
                 # 服务器不保持长连接,传输完毕断开连接
                 self.isclosed = True
-                return -1
                 #raise ConnectionClosed('Server closes connection')
 
             recv = cache + recv
@@ -205,12 +196,17 @@ class TLSSocket():
                     plaintext = self.tls_cxt.decrypt(flowtext, b'\x17')
                     self.response.flush(plaintext)
                     if self.response.read_ended:
-                        return True
+
+                        #self.isclosed = False
+                        read_ended  = True
 
                 elif handshake_type == 0x15:
                     self.isclosed = True
-                    raise ConnectionClosed('Server Encrypted Alert')
+                    #raise ConnectionClosed('Server Encrypted Alert')
 
+
+        if self.isclosed:
+            self.socket.shutdown(1)
 
     def send(self, plaintext):
 

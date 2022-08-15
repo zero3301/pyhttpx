@@ -52,7 +52,6 @@ class HTTPSConnectionPool:
         self.lock = RLock()
         self.req = req
     def _new_conn(self, **kwargs):
-
         conn = TLSSocket(host=self.req.host, port=self.req.port,
             proxies=self.req.proxies, timeout=self.req.timeout,**kwargs)
         conn.connect()
@@ -130,7 +129,6 @@ class HttpSession(object):
         )
 
         addr = (req.host, req.port)
-
         if req.headers.get('Cookie'):
             self.handle_cookie(req ,req.headers.get('Cookie'))
 
@@ -138,7 +136,6 @@ class HttpSession(object):
             self.handle_cookie(req, cookies)
 
         _cookies = self.cookie_manger.get(addr)
-
         send_kw  = {}
         if _cookies:
             send_kw['Cookie'] = '; '.join('{}={}'.format(k,v) for k,v in _cookies.items())
@@ -192,12 +189,12 @@ class HttpSession(object):
 
         if self.tlss.get(addr):
             connpool = self.tlss[addr]
-            conn = connpool._get_conn()
+            conn = connpool._get_conn(**self.kw)
 
         else:
             connpool = HTTPSConnectionPool(req, host=req.host, port=req.host)
             self.tlss[addr] = connpool
-            conn = connpool._get_conn()
+            conn = connpool._get_conn(**self.kw)
 
         return connpool, conn
     def send(self, req, msg, update_cookies):
@@ -206,7 +203,7 @@ class HttpSession(object):
         result_status = conn.send(msg)
 
         #服务器断开连接
-        if result_status == -1:
+        if conn.isclosed:
             connpool, conn = self.get_conn(req, addr)
             result_status = conn.send(msg)
 

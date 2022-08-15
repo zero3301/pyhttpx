@@ -4,7 +4,10 @@
     <list default="true" id="d5f40bf2-b3cd-4ad5-b25f-7f4a0961acdd" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyhttpx/t1.pyd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/tls_session.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/tls_session.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyhttpx/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyhttpx/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/docs/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyhttpx/session.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/session.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_requests.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_requests.py" afterDir="false" />
     </list>
@@ -37,6 +40,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\root\Desktop\github\pyhttpx\docs" />
       <recent name="C:\Users\root\Desktop\github\pyhttpx\tests" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
@@ -206,22 +210,22 @@
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
     <state x="610" y="211" key="FileChooserDialogImpl/0.0.2048.1112@0.0.2048.1112" timestamp="1660479979530" />
-    <state width="1690" height="281" key="GridCell.Tab.0.bottom" timestamp="1660532554911">
+    <state width="1714" height="504" key="GridCell.Tab.0.bottom" timestamp="1660547740382">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="1690" height="281" key="GridCell.Tab.0.bottom/0.0.2048.1112@0.0.2048.1112" timestamp="1660532554911" />
-    <state width="1690" height="281" key="GridCell.Tab.0.center" timestamp="1660532554911">
+    <state width="1714" height="504" key="GridCell.Tab.0.bottom/0.0.2048.1112@0.0.2048.1112" timestamp="1660547740382" />
+    <state width="1714" height="504" key="GridCell.Tab.0.center" timestamp="1660547740381">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="1690" height="281" key="GridCell.Tab.0.center/0.0.2048.1112@0.0.2048.1112" timestamp="1660532554911" />
-    <state width="1690" height="281" key="GridCell.Tab.0.left" timestamp="1660532554910">
+    <state width="1714" height="504" key="GridCell.Tab.0.center/0.0.2048.1112@0.0.2048.1112" timestamp="1660547740381" />
+    <state width="1714" height="504" key="GridCell.Tab.0.left" timestamp="1660547740381">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="1690" height="281" key="GridCell.Tab.0.left/0.0.2048.1112@0.0.2048.1112" timestamp="1660532554910" />
-    <state width="1690" height="281" key="GridCell.Tab.0.right" timestamp="1660532554911">
+    <state width="1714" height="504" key="GridCell.Tab.0.left/0.0.2048.1112@0.0.2048.1112" timestamp="1660547740381" />
+    <state width="1714" height="504" key="GridCell.Tab.0.right" timestamp="1660547740381">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
-    <state width="1690" height="281" key="GridCell.Tab.0.right/0.0.2048.1112@0.0.2048.1112" timestamp="1660532554911" />
+    <state width="1714" height="504" key="GridCell.Tab.0.right/0.0.2048.1112@0.0.2048.1112" timestamp="1660547740381" />
     <state width="1304" height="301" key="GridCell.Tab.1.bottom" timestamp="1660470385875">
       <screen x="0" y="0" width="2048" height="1112" />
     </state>
