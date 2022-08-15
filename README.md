@@ -74,7 +74,8 @@ b'GET /get HTTP/1.1\r\nHost: httpbin.org ...
 搜索tls,将值改为3即可
 如果firefox访问没问题,表示tls1.2也是可以访问的
 
-HttpSession 参数说明
+**HttpSession 参数说明**
+
 tls_ciphers: 密码套件
 
 exts: 扩展类型
