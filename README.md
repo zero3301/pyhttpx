@@ -77,7 +77,7 @@ exts: 扩展类型
 exts_payload: 需要填充的扩展数据,不包括数据长度
 
 ```
->>>tls_ciphers = [49195, 49199, 52392, 52393, 49196, 49200, 49162, 49161, 49171, 49172, 156, 157, 47, 53]
+>>>tls_ciphers = [49195, 49199, 52393, 52392, 49196, 49200, 49162, 49161, 49171, 49172, 156, 157, 47, 53]
 >>>exts = [0, 65281, 10, 11, 35, 13172, 16, 5, 13, 222]  #222是自定义的随机数类型
 >>>exts_payload = {222: '\x01'}
 >>>sess = pyhttpx.HttpSession(tls_ciphers=tls_ciphers,exts=exts,exts_payload=exts_payload)
@@ -118,5 +118,4 @@ exts_payload: 需要填充的扩展数据,不包括数据长度
 
  ![Image](https://github.com/zero3301/pyhttpx/blob/main/image/wechat.png)
 
-
- ![ts-node result](https://file.qingflow.com/documents/form/attach/35efbb5c-b704-4ac6-9074-8adc2f0ef9df.png)
+ ![Image_QingFlow](https://file.qingflow.com/documents/form/attach/35efbb5c-b704-4ac6-9074-8adc2f0ef9df.png)

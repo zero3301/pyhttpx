@@ -16,7 +16,6 @@ def _prf(secret, seed,hashes, numblocks):
     for j in range(numblocks):
         output += hmac.new(secret, msg=next(a) + seed, digestmod=hashes).digest()
 
-
     return output
 
 def prf(pms, seed,hashes=None,step=10,outlen=48):

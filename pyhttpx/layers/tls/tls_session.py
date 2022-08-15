@@ -93,6 +93,7 @@ class TLSSocket():
             #socket.timeout
             recv = cache + recv
             cache = b''
+
             if recv:
                 while recv:
                     handshake_type = struct.unpack('!B', recv[:1])[0]
@@ -186,7 +187,8 @@ class TLSSocket():
             if not recv:
                 # 服务器不保持长连接,传输完毕断开连接
                 self.isclosed = True
-                raise ConnectionClosed('Server closes connection')
+                return -1
+                #raise ConnectionClosed('Server closes connection')
 
             recv = cache + recv
             cache = b''
@@ -203,7 +205,6 @@ class TLSSocket():
                     plaintext = self.tls_cxt.decrypt(flowtext, b'\x17')
                     self.response.flush(plaintext)
                     if self.response.read_ended:
-
                         return True
 
                 elif handshake_type == 0x15:
@@ -212,8 +213,9 @@ class TLSSocket():
 
 
     def send(self, plaintext):
+
         self.response = Response(tls_ctx=self)
         ciphertext = self.tls_cxt.encrypt(plaintext, b'\x17')
         self.write_buff = b'\x17' + b'\x03\x03' + struct.pack('!H', len(ciphertext)) + ciphertext
-        self.flush()
+        return self.flush()
 

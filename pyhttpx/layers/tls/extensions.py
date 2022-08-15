@@ -82,7 +82,7 @@ class ExtSessionTicket(_BaseExtension):
         payload,
     ]
 
-class aaExtNextProtocolNegotiation(_BaseExtension):
+class _ExtNextProtocolNegotiation(_BaseExtension):
     _type = 0x3374
     payload = ''
     fields_desc = [
@@ -132,7 +132,7 @@ class ExtRecordSizeLimit(_BaseExtension):
         _type,
         payload,
     ]
-class ExtPadding(_BaseExtension):
+class _ExtPadding(_BaseExtension):
     _type = 0x15
     payload = bytes(random.randint(0,100))
     fields_desc = [

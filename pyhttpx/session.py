@@ -186,29 +186,37 @@ class HttpSession(object):
 
         return msg
 
-    def send(self, req, msg, update_cookies):
+    def get_conn(self,req, addr):
 
-        addr  = (req.host, req.port)
         self.active_addr = addr
 
         if self.tlss.get(addr):
             connpool = self.tlss[addr]
             conn = connpool._get_conn()
-            tls_session = conn
 
         else:
-            connpool = HTTPSConnectionPool(req,host=req.host,port=req.host)
+            connpool = HTTPSConnectionPool(req, host=req.host, port=req.host)
             self.tlss[addr] = connpool
             conn = connpool._get_conn()
-            tls_session = conn
 
-        tls_session.send(msg)
+        return connpool, conn
+    def send(self, req, msg, update_cookies):
+        addr = (req.host, req.port)
+        connpool, conn = self.get_conn(req, addr)
+        result_status = conn.send(msg)
 
-        response = tls_session.response
+        #服务器断开连接
+        if result_status == -1:
+            connpool, conn = self.get_conn(req, addr)
+            result_status = conn.send(msg)
+
+        response = conn.response
         response.request = req
         response.request.raw = msg
-        if response.headers and update_cookies:
-            self.handle_cookie(req, response.headers.get('set-cookie'))
+
+        set_cookie = response.headers.get('set-cookie')
+        if set_cookie and update_cookies:
+            self.handle_cookie(req, set_cookie)
         response.cookies = response.headers.get('set-cookie', {})
 
         self._content = response.content

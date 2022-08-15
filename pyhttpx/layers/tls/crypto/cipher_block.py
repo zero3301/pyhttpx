@@ -84,8 +84,6 @@ class _BlockCipher(metaclass=_BlockCipherMetaclass):
         PC = self._tls_padding(data[16:])
         encryptor = self._cipher.encryptor()
         C = encryptor.update(PC) + encryptor.finalize()
-
-
         return b'%s%s' % (self.iv,C)
 
     def decrypt(self, C, A=None, nonce_explicit=None):
