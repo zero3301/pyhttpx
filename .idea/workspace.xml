@@ -2,16 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d5f40bf2-b3cd-4ad5-b25f-7f4a0961acdd" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/crypto/cipher_block.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/crypto/cipher_block.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/crypto/prf.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/crypto/prf.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/extensions.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/extensions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/suites.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/suites.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyhttpx/layers/tls/tls_session.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/layers/tls/tls_session.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyhttpx/session.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyhttpx/session.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyhttpx/t1.pyd" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_requests.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_requests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_requests.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_requests.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,6 +36,9 @@
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\root\Desktop\github\pyhttpx\tests" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\root\Desktop\github\pyhttpx" />
       <recent name="C:\Users\root\Desktop\github\pyhttpx\image" />

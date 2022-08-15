@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
-
 from setuptools.command.test import test as TestCommand
 import sys
+
 install_requires = [
     "cryptography==36.0.1",
     "rsa==4.8",
@@ -9,7 +9,6 @@ install_requires = [
     "brotli"]
 
 test_requirements = [
-
     "pytest>=3",
 ]
 

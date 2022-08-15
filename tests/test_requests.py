@@ -20,7 +20,7 @@ if __name__ == '__main__':
     exts = [0, 65281, 10, 11, 35, 13172, 16, 5, 13]
     exts_payload = {222: '\x01'}
     r = sess.get(url,)
-    
+
     print(r.status_code)
     print(r.text[:100])
 
