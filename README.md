@@ -70,8 +70,8 @@ b'GET /get HTTP/1.1\r\nHost: httpbin.org ...
 
 **如何禁用firefox的tls1.3**
 
-地址栏输入: about:config
-搜索tls,将值改为3即可
+地址栏输入: about:config,
+搜索tls,将security.tls.version.max的值改为3即可,
 如果firefox访问没问题,表示tls1.2也是可以访问的
 
 **HttpSession 参数说明**
