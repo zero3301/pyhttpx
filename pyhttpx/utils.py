@@ -15,6 +15,12 @@ def default_headers():
     return h
 
 
+class Conf:
+    debug = True
+
+def vprint(*args):
+    if Conf.debug:
+        print(*args)
 
 
 

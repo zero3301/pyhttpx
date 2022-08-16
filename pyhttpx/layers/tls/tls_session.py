@@ -28,7 +28,7 @@ from pyhttpx.exception import (
     ReadTimeout)
 
 from pyhttpx.layers.tls.socks import SocketProxy
-
+from pyhttpx.utils import vprint
 class TLSSocket():
     def __init__(self, host, port,proxies=None, timeout=None, **kwargs):
         self.kw = {}
@@ -55,6 +55,7 @@ class TLSSocket():
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
         self.timeout = self.timeout or 0
         if self.proxies:
 
@@ -167,7 +168,7 @@ class TLSSocket():
 
             #timeout=0,会设置非阻塞
             self.timeout > 0 and self.socket.settimeout(self.timeout)
-            self.socket.settimeout(None)
+            #self.socket.settimeout(None)
             try:
                 recv = self.socket.recv(6324)
             except ConnectionAbortedError:
@@ -180,8 +181,7 @@ class TLSSocket():
                 # 服务器不保持长连接,传输完毕断开连接
                 self.isclosed = True
                 read_ended = True
-
-                #raise ConnectionClosed('Server closes connection')
+                print('fin')
 
             recv = cache + recv
             cache = b''
@@ -199,31 +199,16 @@ class TLSSocket():
                     self.response.flush(plaintext)
 
                     if self.response.read_ended:
-                        #self.isclosed = False
-                        print(self.response.text[:100])
+
                         read_ended  = True
+                        if self.response.headers.get('connection') != 'keep-alive':
+                            self.isclosed = True
+
 
                 elif handshake_type == 0x15:
                     read_ended = True
                     self.isclosed = True
-                    #raise ConnectionClosed('Server Encrypted Alert')
 
-
-        try:
-            #尝试获取fin包
-            self.socket.settimeout(0.0001)
-            recv = self.socket.recv(1024)
-
-            if not recv:
-
-                self.isclosed = True
-                self.socket.shutdown(1)
-
-        except socket.timeout:
-            self.isclosed = False
-        finally:
-            self.socket.settimeout(None)
-            self.socket.setblocking(True)
 
     def send(self, plaintext):
 

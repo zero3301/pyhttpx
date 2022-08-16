@@ -104,14 +104,14 @@ class ExtStatusRequest(_BaseExtension):
         _type,
         payload,
     ]
-class aaExtDelegatedCredentials(_BaseExtension):
+class __ExtDelegatedCredentials(_BaseExtension):
     _type = 0x22
     payload = '\x00\x08\x04\x03\x05\x03\x06\x03\x02\x03'
     fields_desc = [
         _type,
         payload,
     ]
-class aaExtSupportVersions(_BaseExtension):
+class __ExtSupportVersions(_BaseExtension):
     _type = 0x2b
     payload = '\x02\x03\x03'
     fields_desc = [
@@ -132,7 +132,7 @@ class ExtRecordSizeLimit(_BaseExtension):
         _type,
         payload,
     ]
-class _ExtPadding(_BaseExtension):
+class __ExtPadding(_BaseExtension):
     _type = 0x15
     payload = bytes(random.randint(0,100))
     fields_desc = [
