@@ -17,8 +17,10 @@ from urllib.parse import urlencode
 from pyhttpx.compat import *
 from pyhttpx.models import Request
 from pyhttpx.utils import default_headers
-from pyhttpx.layers.tls.tls_session import TLSSocket
+from pyhttpx.layers.tls.pyssl import TLSSocket
 
+from pyhttpx.models import Response
+from pyhttpx.exception import TooManyRedirects
 log = logging.getLogger(__name__)
 
 class CookieJar(object):
@@ -44,17 +46,20 @@ class CookieManger(object):
 class HTTPSConnectionPool:
     scheme = "https"
     maxsize = 100
-    def __init__(self,req, **kwargs):
+    def __init__(self,**kwargs):
         self.host = kwargs['host']
         self.port = kwargs['port']
+        self.req = kwargs.get('request')
 
         self.poolconnections = LifoQueue(maxsize=self.maxsize)
         self.lock = RLock()
-        self.req = req
+
     def _new_conn(self, **kwargs):
-        conn = TLSSocket(host=self.req.host, port=self.req.port,
-            proxies=self.req.proxies, timeout=self.req.timeout,**kwargs)
-        conn.connect()
+        from pyhttpx.layers.tls import pyssl
+        conn = pyssl.SSLContext(pyssl.PROTOCOL_TLSv1_2).wrap_socket(
+            sock=None,server_hostname=None, ** kwargs)
+
+        conn.connect((self.req.host,self.req.port))
 
         return conn
 
@@ -94,6 +99,7 @@ class HttpSession(object):
 
     def handle_cookie(self, req, set_cookies):
         #
+
         if not set_cookies:
             return
         c = {}
@@ -109,7 +115,6 @@ class HttpSession(object):
                 c[k] = v
         elif isinstance(set_cookies, dict):
             c.update(set_cookies)
-
         self.cookie_manger.set_cookie(req,c)
 
 
@@ -142,6 +147,14 @@ class HttpSession(object):
         self.req = req
         msg = self.prep_request(req, send_kw)
         resp = self.send(req, msg, update_cookies)
+        if resp.status_code == 302:
+            for i in range(20):
+                resp = self.send(req, msg, update_cookies)
+                if resp.status_code != 302:
+                    break
+                if i > 10:
+                    raise TooManyRedirects('too many redirects')
+
         return resp
 
     def prep_request(self, req, send_kw) -> bytes:
@@ -152,9 +165,6 @@ class HttpSession(object):
         dh.update(req.headers)
         dh.update(send_kw)
 
-        for k,v in dh.items():
-            msg += ('%s: %s\r\n' % (k ,v)).encode()
-
         req_body = ''
         if req.method == 'POST':
             if req.data:
@@ -162,21 +172,15 @@ class HttpSession(object):
                     req_body = req.data
 
                 elif isinstance(req.data, dict):
-                    # Content-Type: application/x-www-form-urlencoded\r\n
-                    # Content-Length: 14\r\n
 
-                    if not b'Content-Type' in msg:
-                        msg += b'Content-Type: application/x-www-form-urlencoded\r\n'
                     req_body = urlencode(req.data)
 
-
             elif req.json:
-                if not b'Content-Type' in msg:
-                    msg += b'Content-Type: application/json\r\n'
-
                 req_body = json.dumps(req.json,separators=(',',':'))
+            dh['Content-Length'] = len(req_body)
 
-            msg += ('Content-Length: %s\r\n' % (len(req_body))).encode()
+        for k,v in dh.items():
+            msg += ('%s: %s\r\n' % (k ,v)).encode()
 
         msg += b'\r\n'
         msg += req_body.encode()
@@ -186,13 +190,12 @@ class HttpSession(object):
     def get_conn(self,req, addr):
 
         self.active_addr = addr
-
         if self.tlss.get(addr):
             connpool = self.tlss[addr]
             conn = connpool._get_conn(**self.kw)
 
         else:
-            connpool = HTTPSConnectionPool(req, host=req.host, port=req.host)
+            connpool = HTTPSConnectionPool(request=req, host=req.host, port=req.host)
             self.tlss[addr] = connpool
             conn = connpool._get_conn(**self.kw)
 
@@ -200,12 +203,23 @@ class HttpSession(object):
     def send(self, req, msg, update_cookies):
         addr = (req.host, req.port)
         connpool, conn = self.get_conn(req, addr)
-        result_status = conn.send(msg)
+        conn.sendall(msg)
+        response = Response()
 
-        response = conn.response
+        while 1:
+            r = conn.recv(1024)
+            if r is None:
+                conn.isclosed = True
+                break
+            else:
+                response.flush(r)
+            if response.read_ended:
+                if response.headers.get('connection') != 'keep-alive':
+                    conn.isclosed = True
+                break
+
         response.request = req
         response.request.raw = msg
-
         set_cookie = response.headers.get('set-cookie')
         if set_cookie and update_cookies:
             self.handle_cookie(req, set_cookie)
@@ -215,6 +229,7 @@ class HttpSession(object):
         if not conn.isclosed:
             connpool._put_conn(conn)
 
+
         return response
 
     @property
@@ -222,6 +237,7 @@ class HttpSession(object):
         _cookies = self.cookie_manger.get(self.active_addr)
         return _cookies
     def get(self, url, **kwargs):
+
         return self.request('GET', url, **kwargs)
 
     def post(self,url, **kwargs):

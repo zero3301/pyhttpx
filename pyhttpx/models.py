@@ -87,7 +87,7 @@ class Response(object):
 
         for head in headers_raw:
             k,v = head.split(': ', 1)
-            k,v = k.lower().strip(),v.lower().strip()
+            k,v = k.lower().strip(),v.strip()
             if k == 'set-cookie':
                 headers[k].append(v)
             else:
@@ -107,7 +107,6 @@ class Response(object):
             if self.transfer_encoding == self.headers.get('transfer-encoding'):
                 #chunked
                 if self.plaintext_buffer.endswith(b'0\r\n\r\n'):
-
                     self.body = self.plaintext_buffer
                     self.read_ended = True
 
@@ -164,3 +163,4 @@ class Response(object):
     def __repr__(self):
         template = '<Response status_code={status_code}>'
         return  template.format(status_code=self.status_code)
+

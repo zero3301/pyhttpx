@@ -114,7 +114,6 @@ class Cipher_AES_256_CBC(Cipher_AES_128_CBC):
 if __name__ == '__main__':
 
     import os
-
     key = b'1' * 16
     aes = _tls_block_cipher_algs.get('AES_128_CBC')(key=key,iv=None)
 

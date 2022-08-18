@@ -26,7 +26,8 @@ class ConnectionClosed(BaseExpetion):
 
 class ReadTimeout(BaseExpetion):
     pass
-
+class TooManyRedirects(BaseExpetion):
+    pass
 
 class ProxyError(IOError):
     """Socket_err contains original socket.error exception."""
