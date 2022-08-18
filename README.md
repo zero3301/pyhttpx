@@ -104,7 +104,7 @@ exts_payload: 需要填充的扩展数据,不包括数据长度
 >>>r = ssock.recv(1024)
 ```
 
-# websocket
+# websocket,支持修改ja3
     参考文档tests/test_websockt.py
     
 # 版本支持
