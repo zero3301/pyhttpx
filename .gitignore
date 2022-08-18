@@ -5,6 +5,7 @@ __pycache__/
 *$py.class
 
 .idea
+.pypirc
 # C extensions
 *.so
 
