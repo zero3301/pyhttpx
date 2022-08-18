@@ -80,7 +80,7 @@ class TLSSocket():
 
     def _tls_do_handshake(self):
 
-        ciphersuites, extensions = CipherSuites(**self.kw).dump(),dump_extension(self.host, **self.kw)
+        ciphersuites, extensions = CipherSuites(self.kw).dump(),dump_extension(self.host, **self.kw)
         hello = HelloClient(ciphersuites, extensions)
         self.tls_cxt.client_ctx.random = hello.hanshake.random
         self.sock.sendall(hello.dump(self.tls_cxt))
@@ -254,15 +254,26 @@ class TLSSocket():
         self.plaintext_reader = b''
         return b
 
+
+def default_context():
+    pass
 PROTOCOL_TLSv1_2 = b'\x03\x03'
 class SSLContext:
-    check_hostname: bool = False
+
 
     def __init__(self, protocol):
         self.protocol = protocol
+        self.check_hostname: bool = False
+        self.cipers = None
+        self.exts = None
+        self.exts_payload =None
 
-    def wrap_socket(self, sock, server_hostname=None,**kwargs):
-        return TLSSocket(sock=sock,server_hostname=server_hostname, **kwargs)
+    def set_ja3(self):
+        pass
+
+    def wrap_socket(self, sock, server_hostname=None,ssl=None,**kwargs):
+
+        return TLSSocket(sock=sock,server_hostname=server_hostname, ssl=self, **kwargs)
 
     def load_cert_chain(self, certfile: str, ketfile: str):
         pass
@@ -294,4 +305,3 @@ if __name__ == '__main__':
             break
 
     print(response.text)
-    time.sleep(111)

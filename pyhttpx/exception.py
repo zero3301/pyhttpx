@@ -29,6 +29,15 @@ class ReadTimeout(BaseExpetion):
 class TooManyRedirects(BaseExpetion):
     pass
 
+
+#websocket
+class SwitchingProtocolError(BaseExpetion):
+    pass
+class SecWebSocketKeyError(BaseExpetion):
+    pass
+class WebSocketClosedError(BaseExpetion):
+    pass
+
 class ProxyError(IOError):
     """Socket_err contains original socket.error exception."""
     def __init__(self, msg, socket_err=None):
@@ -40,3 +49,4 @@ class ProxyError(IOError):
 
     def __str__(self):
         return self.msg
+
