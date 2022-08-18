@@ -35,16 +35,15 @@ from pyhttpx.utils import vprint
 
 
 class TLSSocket:
-    def __init__(self, sock=None, server_hostname=None, proxies=None, timeout=None, **kwargs):
+    def __init__(self, sock=None, server_hostname=None, proxies=None, timeout=None, ssl=None):
         super().__init__()
-        self.kw = {}
-        self.kw.update(kwargs)
         self._closed = True
         self._timeout = 0
         self.server_hostname = server_hostname
         self.proxies = proxies
         self._timeout = timeout
         self.sock = sock
+        self.context = ssl or default_context()
 
     @property
     def isclosed(self):
@@ -66,7 +65,7 @@ class TLSSocket:
 
     async def _tls_do_handshake(self):
 
-        ciphersuites, extensions = CipherSuites(**self.kw).dump(), dump_extension(self.host, **self.kw)
+        ciphersuites, extensions =CipherSuites(self.context).dump(),dump_extension(self.host,self.context)
         hello = HelloClient(ciphersuites, extensions)
         self.tls_cxt.client_ctx.random = hello.hanshake.random
         self.reader, self.writer = await asyncio.open_connection(
@@ -191,22 +190,44 @@ class TLSSocket:
 
 
 PROTOCOL_TLSv1_2 = b'\x03\x03'
+def default_context():
+    return SSLContext(PROTOCOL_TLSv1_2)
 
 
 class SSLContext:
-    check_hostname: bool = False
-
-    def __init__(self, protocol=None):
+    def __init__(self, protocol):
         self.protocol = protocol
+        self.check_hostname: bool = False
 
-    def wrap_socket(self, sock=None, server_hostname=None, **kwargs):
-        return TLSSocket(sock=sock, server_hostname=server_hostname, **kwargs)
+        self.ciphers = None
+        self.exts = None
+        self.exts_payload = None
+        self.supported_groups = None
+        self.supported_groups = None
+        self.ec_points = None
+
+
+
+    def set_ja3(self, ja3=None):
+        if ja3:
+            self.protocol, self.ciphers, self.exts,self.supported_groups,self.ec_points = ja3.split(',')
+            self.ciphers = [int(i) for i in self.ciphers.split('-')]
+            self.exts = [int(i) for i in self.exts.split('-')]
+            self.supported_groups = [int(i) for i in self.supported_groups.split('-')]
+            self.ec_points = [int(i) for i in self.ec_points.split('-')]
+
+            self.supported_groups = b''.join([struct.pack('!H', i) for i in self.supported_groups])
+            self.ec_points = b''.join([struct.pack('!B', i) for i in self.ec_points])
+
+    def set_ext_payload(self, data):
+        self.exts_payload = data
+    def wrap_socket(self, sock=None, server_hostname=None):
+
+        return TLSSocket(sock=sock,server_hostname=server_hostname, ssl=self)
 
     def load_cert_chain(self, certfile: str, ketfile: str):
         pass
 
-    def set_ciphers(self, ciphers: str):
-        pass
 
 
 

@@ -46,8 +46,8 @@ TLS_SUITES = {
 
 
 class CipherSuites:
-    def __init__(self, ciphers=None):
-        self.ciphers = ciphers or CIPHER_SUITES
+    def __init__(self, context=None):
+        self.ciphers = context.ciphers or CIPHER_SUITES
 
     def dump(self):
         temp = b''.join([struct.pack('!H',i) for i in self.ciphers])

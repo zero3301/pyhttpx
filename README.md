@@ -76,22 +76,37 @@ b'GET /get HTTP/1.1\r\nHost: httpbin.org ...
 
 **HttpSession 参数说明**
 
-tls_ciphers: 密码套件
-
-exts: 扩展类型
+ja3: 指纹构成
 
 exts_payload: 需要填充的扩展数据,不包括数据长度
 
 ```
->>>tls_ciphers = [49195, 49199, 52393, 52392, 49196, 49200, 49162, 49161, 49171, 49172, 156, 157, 47, 53]
->>>exts = [0, 65281, 10, 11, 35, 13172, 16, 5, 13, 222]  #222是自定义的随机数类型
+>>>ja3 = '771,49195-49199-52393-52392-49196-49200-49162-49161-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-13-28-222,29-23-24-25,0'
 >>>exts_payload = {222: '\x01'}
->>>sess = pyhttpx.HttpSession(tls_ciphers=tls_ciphers,exts=exts,exts_payload=exts_payload)
+>>>sess = pyhttpx.HttpSession(ja3=ja3,exts_payload=exts_payload)
 >>>r = sess.get('https://tls.peet.ws/api/all')
 >>>r.text
 ... "ja3": "771,47-49172-52392-53-49200-49195-157-523925,0...
 ```
 
+# 支持ssl上下文
+
+```
+>>>from pyhttpx.layers.tls.pyssl import SSLContext,PROTOCOL_TLSv1_2
+>>>import socket
+>>>addres = ('httpbin.org', 443)
+>>>context = SSLContext(PROTOCOL_TLSv1_2)
+>>>sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+>>>ssock = context.wrap_socket(sock, server_hostname=addres[0])
+>>>ssock.connect(addres)
+>>>m = 'GET / HTTP/1.1\r\nHOST: %s\r\n\r\n' % addres[0]
+>>>ssock.sendall(m.encode())
+>>>r = ssock.recv(1024)
+```
+
+# websocket
+    参考文档tests/test_websockt.py
+    
 # 版本支持
 
 - tls1.2

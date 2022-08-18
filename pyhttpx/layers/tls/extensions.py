@@ -18,7 +18,7 @@ class _BaseExtension(metaclass=ExtensionMetaclass):
         return b''
 
 
-    def dump(self, host):
+    def dump(self, host, context):
         _type = self.fields_desc[0]
         payload = self.fields_desc[1]
         if isinstance(payload, str):
@@ -35,12 +35,12 @@ class ExtServerName(_BaseExtension):
         payload
     ]
 
-    def dump(self, host):
+    def dump(self, host, context):
         temp = b'\x00' + struct.pack('!H',len(host)) + host.encode()
         self.payload = struct.pack('!H',len(temp)) +  temp
         self.fields_desc[1] = self.payload
 
-        return super().dump(host)
+        return super().dump(host, context)
 
 
 class ExtExTenedMasterSecret(_BaseExtension):
@@ -60,19 +60,32 @@ class ExtRenegotitationInfo(_BaseExtension):
     ]
 class ExtSupportedGroups(_BaseExtension):
     _type = 0x0a
-    payload = '\x00\x08\x00\x1d\x00\x17\x00\x18\x00\x19'
+    payload = b'\x00\x1d\x00\x17\x00\x18\x00\x19'
     fields_desc = [
         _type,
         payload,
     ]
+    def dump(self, host, context):
+        supported_groups = context.supported_groups or self.payload
+        self.payload = struct.pack('!H',len(supported_groups)) +  supported_groups
+        self.fields_desc[1] = self.payload
+
+        return super().dump(host, context)
+
 
 class ExtEcPoint(_BaseExtension):
     _type = 0x0b
-    payload = '\x01\x00'
+    payload = b'\x00'
     fields_desc = [
         _type,
         payload,
     ]
+    def dump(self, host, context):
+        ec_points = context.ec_points or self.payload
+        self.payload = struct.pack('!B',len(ec_points)) +  ec_points
+        self.fields_desc[1] = self.payload
+
+        return super().dump(host, context)
 
 class ExtSessionTicket(_BaseExtension):
     _type = 0x23
@@ -141,7 +154,7 @@ class __ExtPadding(_BaseExtension):
     ]
 
 
-def make_randext(host, ext_type, payload=None):
+def make_randext(host, ext_type, payload=None,context=None):
     if payload is None:
         payload = ''
     fields_desc = [
@@ -149,25 +162,26 @@ def make_randext(host, ext_type, payload=None):
         payload,
     ]
     ext = type('=^_^=', (_BaseExtension,), dict(fields_desc=fields_desc))
-    return ext().dump(host)
+    return ext().dump(host, context)
 
 
-def dump_extension(host, **kwargs):
+def dump_extension(host, context):
     #771,4865,0-65281-10-51-43-13-45,29-23,0
     #exts=None, exts_payload=None
-    exts = kwargs.get('exts', None)
-    exts_payload = kwargs.get('exts_payload', {})
+    exts = context.exts
+    exts_payload = context.exts_payload
     ext_data = []
+
     if exts_payload is None:
         exts_payload = {}
     if not exts:
         for e in list(_tls_ext_cls.values())[:]:
-            ext_data.append(e().dump(host))
+            ext_data.append(e().dump(host, context))
 
     else:
         for e in exts:
             if _tls_ext_cls.get(e):
-                d = _tls_ext_cls.get(e)().dump(host)
+                d = _tls_ext_cls.get(e)().dump(host, context)
             else:
                 payload = exts_payload.get(e)
                 d = make_randext(host, e, payload)
@@ -182,7 +196,5 @@ if __name__ == '__main__':
     exts_payload = {222: 'a'}
 
     host = '127.0.0.1'
-    a = dump_extension(host, exts, exts_payload)
 
-    print(a)
 

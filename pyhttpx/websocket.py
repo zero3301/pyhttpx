@@ -66,6 +66,7 @@ class WebSocketClient:
 
     async def connect(self):
         context = SSLContext(PROTOCOL_TLSv1_2)
+
         self.sock = context.wrap_socket()
         await self.sock.connect(self.addres)
         await self.on_open()

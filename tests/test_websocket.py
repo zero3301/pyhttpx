@@ -1,6 +1,12 @@
+"""
+docs
+pyhttpx.weboskcts
+
+"""
 
 import asyncio
 from pyhttpx.websocket import WebSocketClient
+
 class WSS:
     def __init__(self,url=None, headers=None, loop=None):
         self.url = url
@@ -17,7 +23,7 @@ class WSS:
     async def recv(self):
         while 1:
             r = await self.sock.recv()
-
+            print(r)
 
 def main():
     loop = asyncio.get_event_loop()
@@ -37,7 +43,6 @@ def main():
 
     wss = WSS(url, headers, loop)
     loop.run_until_complete(wss.connect())
-
     loop.create_task(wss.send())
     loop.create_task(wss.recv())
     loop.run_forever()

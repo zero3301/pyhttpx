@@ -29,16 +29,17 @@ from pyhttpx.exception import (
 
 from pyhttpx.layers.tls.socks import SocketProxy
 from pyhttpx.utils import vprint
+
 class TLSSocket():
-    def __init__(self, server_hostname=None,proxies=None, timeout=None, **kwargs):
-        self.kw = {}
-        self.kw.update(kwargs)
+    def __init__(self,sock=None, server_hostname=None,proxies=None, timeout=None, ssl=None):
+
         self._closed = True
         self.timeout = 0
         self.server_hostname = server_hostname
         self.proxies = proxies
         self.timeout = timeout
-        self.sock = None
+        self.sock = sock
+        self.context = ssl or default_context()
 
     @property
     def isclosed(self):
@@ -80,7 +81,7 @@ class TLSSocket():
 
     def _tls_do_handshake(self):
 
-        ciphersuites, extensions = CipherSuites(self.kw).dump(),dump_extension(self.host, **self.kw)
+        ciphersuites, extensions = CipherSuites(self.context).dump(),dump_extension(self.host,self.context)
         hello = HelloClient(ciphersuites, extensions)
         self.tls_cxt.client_ctx.random = hello.hanshake.random
         self.sock.sendall(hello.dump(self.tls_cxt))
@@ -254,37 +255,55 @@ class TLSSocket():
         self.plaintext_reader = b''
         return b
 
-
-def default_context():
-    pass
 PROTOCOL_TLSv1_2 = b'\x03\x03'
+def default_context():
+    return SSLContext(PROTOCOL_TLSv1_2)
+
 class SSLContext:
 
 
     def __init__(self, protocol):
         self.protocol = protocol
         self.check_hostname: bool = False
-        self.cipers = None
+
+        self.ciphers = None
         self.exts = None
-        self.exts_payload =None
+        self.exts_payload = None
+        self.supported_groups = None
+        self.supported_groups = None
+        self.ec_points = None
 
-    def set_ja3(self):
-        pass
 
-    def wrap_socket(self, sock, server_hostname=None,ssl=None,**kwargs):
 
-        return TLSSocket(sock=sock,server_hostname=server_hostname, ssl=self, **kwargs)
+    def set_ja3(self, ja3=None):
+
+        if ja3:
+            self.protocol, self.ciphers, self.exts,self.supported_groups,self.ec_points = ja3.split(',')
+            self.ciphers = [int(i) for i in self.ciphers.split('-')]
+            self.exts = [int(i) for i in self.exts.split('-')]
+            self.supported_groups = [int(i) for i in self.supported_groups.split('-')]
+            self.ec_points = [int(i) for i in self.ec_points.split('-')]
+
+
+            self.supported_groups = b''.join([struct.pack('!H', i) for i in self.supported_groups])
+            self.ec_points = b''.join([struct.pack('!B', i) for i in self.ec_points])
+
+    def set_ext_payload(self, data):
+        self.exts_payload = data
+    def wrap_socket(self, sock=None, server_hostname=None):
+
+        return TLSSocket(sock=sock,server_hostname=server_hostname, ssl=self)
 
     def load_cert_chain(self, certfile: str, ketfile: str):
         pass
-    def set_ciphers(self, ciphers: str):
-        pass
+
 
 if __name__ == '__main__':
     host = '127.0.0.1'
     host = 'httpbin.org'
     port = 443
     addres = (host,port)
+
     context = SSLContext(PROTOCOL_TLSv1_2)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
     ssock = context.wrap_socket(sock, server_hostname=host)
@@ -300,7 +319,6 @@ if __name__ == '__main__':
         else:
             p += r
             response.flush(r)
-            print(response.read_ended)
         if response.read_ended:
             break
 

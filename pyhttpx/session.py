@@ -50,27 +50,31 @@ class HTTPSConnectionPool:
         self.host = kwargs['host']
         self.port = kwargs['port']
         self.req = kwargs.get('request')
-
+        self.ja3 = kwargs.get('ja3')
+        self.exts_payload = kwargs.get('exts_payload')
         self.poolconnections = LifoQueue(maxsize=self.maxsize)
         self.lock = RLock()
 
-    def _new_conn(self, **kwargs):
+    def _new_conn(self):
         from pyhttpx.layers.tls import pyssl
-        conn = pyssl.SSLContext(pyssl.PROTOCOL_TLSv1_2).wrap_socket(
-            sock=None,server_hostname=None, ** kwargs)
+        context = pyssl.SSLContext(pyssl.PROTOCOL_TLSv1_2)
+        context.set_ja3(self.ja3)
+        context.set_ext_payload(self.exts_payload)
+
+        conn = context.wrap_socket(
+            sock=None,server_hostname=None)
 
         conn.connect((self.req.host,self.req.port))
-
         return conn
 
-    def _get_conn(self, **kwargs):
+    def _get_conn(self, ja3=None):
         conn = None
         try:
             conn = self.poolconnections.get(block=False)
 
         except queue.Empty:
             pass
-        return conn or self._new_conn(**kwargs)
+        return conn or self._new_conn()
 
     def _put_conn(self, conn):
         try:
@@ -86,20 +90,19 @@ class HTTPSConnectionPool:
 
 
 class HttpSession(object):
-    def __init__(self, **kwargs):
+    def __init__(self, ja3=None, exts_payload=None):
         self.tls_session = None
         self.cookie_manger = CookieManger()
 
         self.active_addr = None
         self.tlss = {}
-        self.kw = {}
-        self.kw.update(kwargs)
+        self.ja3 = ja3
+        self.exts_payload = exts_payload
         self.lock = RLock()
 
 
     def handle_cookie(self, req, set_cookies):
         #
-
         if not set_cookies:
             return
         c = {}
@@ -184,20 +187,18 @@ class HttpSession(object):
 
         msg += b'\r\n'
         msg += req_body.encode()
-
         return msg
 
     def get_conn(self,req, addr):
-
         self.active_addr = addr
         if self.tlss.get(addr):
             connpool = self.tlss[addr]
-            conn = connpool._get_conn(**self.kw)
+            conn = connpool._get_conn()
 
         else:
-            connpool = HTTPSConnectionPool(request=req, host=req.host, port=req.host)
+            connpool = HTTPSConnectionPool(request=req, host=req.host, port=req.host,ja3=self.ja3, exts_payload=self.exts_payload)
             self.tlss[addr] = connpool
-            conn = connpool._get_conn(**self.kw)
+            conn = connpool._get_conn()
 
         return connpool, conn
     def send(self, req, msg, update_cookies):
@@ -228,7 +229,6 @@ class HttpSession(object):
         self._content = response.content
         if not conn.isclosed:
             connpool._put_conn(conn)
-
 
         return response
 
