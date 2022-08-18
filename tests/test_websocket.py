@@ -12,8 +12,13 @@ class WSS:
         self.url = url
         self.headers = headers
         self.loop = loop
+        self.ja3 = '771,49195-49199-52393-52392-49196-49200-49162-49161-49171-49172-156-157-47-53-55,0-23-65281-10-11-35-16-5-13-28-222,29-23-24-25,0-1-2'
+        self.exts_payload = {222: '\x00'}
+        
     async def connect(self):
-        self.sock = await WebSocketClient(url=self.url, headers=self.headers, loop=self.loop).connect()
+        self.sock = await WebSocketClient(url=self.url, headers=self.headers, loop=self.loop,
+                                          ja3=self.ja3,exts_payload=self.exts_payload
+                                          ).connect()
 
     async def send(self):
         while 1:

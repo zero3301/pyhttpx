@@ -28,9 +28,11 @@ DEFAULT_HEADERS = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'
         }
 class WebSocketClient:
-    def __init__(self, url=None, headers=None, loop=None):
+    def __init__(self, url=None, headers=None, loop=None, ja3=None, exts_payload=None):
         self._urlparse = urlparse(url)
         self.headers = headers or DEFAULT_HEADERS
+        self.ja3 = ja3
+        self.exts_payload = exts_payload
 
         if ':' in self._urlparse.netloc:
             host = self._urlparse.netloc.split(':')[0]
@@ -66,7 +68,8 @@ class WebSocketClient:
 
     async def connect(self):
         context = SSLContext(PROTOCOL_TLSv1_2)
-
+        context.set_ja3(self.ja3)
+        context.set_ext_payload(self.exts_payload)
         self.sock = context.wrap_socket()
         await self.sock.connect(self.addres)
         await self.on_open()

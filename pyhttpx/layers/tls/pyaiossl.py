@@ -206,8 +206,6 @@ class SSLContext:
         self.supported_groups = None
         self.ec_points = None
 
-
-
     def set_ja3(self, ja3=None):
         if ja3:
             self.protocol, self.ciphers, self.exts,self.supported_groups,self.ec_points = ja3.split(',')
