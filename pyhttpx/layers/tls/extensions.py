@@ -138,14 +138,25 @@ class ExtDelegatedCredentials(_BaseExtension):
 
 class ExtSignatureAlgorithms(_BaseExtension):
     _type = 0x0d
-    payload = '\x00\x16\x04\x03\x05\x03\x06\x03\x08\x04\x08\x05\x08\x06\x04\x01\x05\x01\x06\x01\x02\x03\x02\x01'
+    payload = b'\x00\x16\x04\x03\x05\x03\x06\x03\x08\x04\x08\x05\x08\x06\x04\x01\x05\x01\x06\x01\x02\x03\x02\x01'
     fields_desc = [
         _type,
         payload,
     ]
+    def dump(self, host, context):
+        if context.browser_type == 'chrome':
+            payload = bytes.fromhex('04030804040105030805050108060601')
+        else:
+            payload = b'\x04\x03\x05\x03\x06\x03\x08\x04\x08\x05\x08\x06\x04\x01\x05\x01\x06\x01\x02\x03\x02\x01'
+
+        self.payload = struct.pack('!H', len(payload)) + payload
+        self.fields_desc[1] = self.payload
+
+        return super().dump(host, context)
+
 class ExtRecordSizeLimit(_BaseExtension):
     _type = 0x1c
-    payload = '\x40\x00'
+    payload = '\x40\x01'
     fields_desc = [
         _type,
         payload,
@@ -212,7 +223,7 @@ class ExtCompressCertificate(_BaseExtension):
 
 class ExtPadding(_BaseExtension):
     _type = 0x15
-    payload = bytes(random.randint(0,100))
+    payload = bytes(135)
     fields_desc = [
         _type,
         payload,

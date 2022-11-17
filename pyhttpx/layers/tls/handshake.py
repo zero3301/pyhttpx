@@ -16,7 +16,7 @@ class HandshakeClientHello:
         self.length = None
         self.version = b'\x03\x03'
         self.random = os.urandom(32)
-        self.sessionId = b'\x00'
+        self.sessionId = b'\x20' + os.urandom(32)
         self.cipherSuites = ciphersuites
         self.compreession = b'\x01\x00'
         self.extension = extensions

@@ -119,7 +119,7 @@ class TLSSocket():
             self.sock.connect((self.host, self.port))
 
         except (ConnectionRefusedError,TimeoutError,socket.timeout):
-            raise ConnectionTimeout('unable to connect %s:%s' % (self.host, self.port))
+            raise ConnectionTimeout(f'unable to connect {self.host}:{self.port}')
 
         else:
             self.local_ip, self.local_port = self.sock.getsockname()[:2]
@@ -150,7 +150,6 @@ class TLSSocket():
 
                 head_flowtext += s
                 recv_len = length - len(head_flowtext)
-
 
             handshake_type = struct.unpack('!B', head_flowtext[:1])[0]
             length = struct.unpack('!H', head_flowtext[3:5])[0]
@@ -296,12 +295,19 @@ class TLSSocket():
         pass
 
     def sendall(self, plaintext):
-        if self.tls13:
-            plaintext += b'\x17'
+        n = 2 ** 12
+        while plaintext:
+            text = plaintext[:n]
+            if self.tls13:
+                text += b'\x17'
 
-        ciphertext = self.tls_cxt.encrypt(plaintext, b'\x17')
-        self.write_buff = b'\x17' + b'\x03\x03' + struct.pack('!H', len(ciphertext)) + ciphertext
-        self.sock.sendall(self.write_buff)
+            ciphertext = self.tls_cxt.encrypt(text, b'\x17')
+            write_buff = b'\x17' + b'\x03\x03' + struct.pack('!H', len(ciphertext)) + ciphertext
+            self.sock.sendall(write_buff)
+            plaintext = plaintext[n:]
+
+
+
         self.plaintext_reader = b''
 
 

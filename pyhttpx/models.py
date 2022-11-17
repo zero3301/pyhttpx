@@ -3,12 +3,9 @@ import json
 from collections import OrderedDict,defaultdict
 import brotli
 from urllib.parse import urlparse,urlencode,quote,unquote,urlsplit
+import copy
 
 
-def encodeURI(url):
-    url = unquote(url)
-    safe = '!@#$&*()=:/;?+\'"'
-    return quote(url,safe='')
 
 def path_url(url):
     urls = []
@@ -24,29 +21,20 @@ def path_url(url):
         urls.append(query)
 
 
-    params = {}
-    if query:
-        for q in query.split('&'):
-            if q:
-                k,v = q.split('=',1)
-                params[k] = v
-            else:
-                params[''] = ''
-    return path, params
+    return path, query
+
 
 
 def encode_params(url, params=None):
     #return path
 
     params = params or {}
-    path, p = path_url(url)
-    params.update(params)
-    params.update(p)
-    result = list(params.items())
-    if result:
-        params = urlencode(result, doseq=True)
-        path = f'{path}?{params}'
+    path, query = path_url(url)
+    if params:
+        query = list(params.items())
+        query = urlencode(query, doseq=True)
 
+    path = f'{path}?{query}'
     return path
 
 
@@ -63,7 +51,7 @@ class Request(object):
 
         self.method = method
         self.url = url
-        self.headers = headers
+        self.headers = copy.deepcopy(headers)
         self.data = data
         self.json = json
         self.params = params

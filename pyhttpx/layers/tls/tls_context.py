@@ -202,6 +202,11 @@ class TLSSessionCtx(object):
 
 
         self.master_secret = prf(self.premaster_secret, seed, self.hash_alg, outlen=48)
+        sslkey_file_name = os.environ.get('SSLKEYLOGFILE')
+        if sslkey_file_name:
+            with open(sslkey_file_name, 'a') as f:
+                s = f'CLIENT_RANDOM {self.client_ctx.random.hex()} {self.master_secret.hex()}'
+                f.write(s)
 
     def key_expandsion(self):
         seed = b'key expansion' + self.server_ctx.random + self.client_ctx.random

@@ -29,12 +29,19 @@ class CookieJar(object):
         self.name = name
         self.value = value
 
+def find_second_last(text, pattern):
+    return text.rfind(pattern, 0, text.rfind(pattern))
+
+def get_top_domain(url):
+    i = find_second_last(url,'.')
+    domain = url if i == -1 else url[i:]
+    return domain
 
 class CookieManger(object):
     def __init__(self):
         self.cookies = {}
     def set_cookie(self,req: Request, cookie: dict) ->None:
-        addr = (req.host, req.port)
+        addr = get_top_domain(req.host)
 
         if self.cookies.get(addr):
             self.cookies[addr].update(cookie)
@@ -108,9 +115,10 @@ class HttpSession(object):
             self.ja3 = ja3
         else:
             if self.browser_type == 'chrome':
-                #rand: 43690,19018,64250, 47802
-                randarr = [43690,19018,64250, 47802]
+
+                randarr = [6682,19018,64250, 47802]
                 self.ja3 = f"771,{randarr[0]}-4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,{randarr[1]}-18-65281-27-16-5-13-10-11-0-45-35-51-23-43-{randarr[3]}-21,{randarr[2]}-29-23-24,0"
+                self.exts_payload = {47802: b'\x00'}
 
             else:
                 #firefox_ja3
@@ -156,7 +164,7 @@ class HttpSession(object):
             allow_redirects=allow_redirects,
 
         )
-
+        self.req = req
         addr = (req.host, req.port)
         if req.headers.get('Cookie'):
             self.handle_cookie(req ,req.headers.get('Cookie'))
@@ -164,7 +172,7 @@ class HttpSession(object):
         if cookies:
             self.handle_cookie(req, cookies)
 
-        _cookies = self.cookie_manger.get(addr)
+        _cookies = self.cookie_manger.get(get_top_domain(self.req.host))
         send_kw  = {}
         if _cookies:
             send_kw['Cookie'] = '; '.join('{}={}'.format(k,v) for k,v in _cookies.items())
@@ -189,12 +197,9 @@ class HttpSession(object):
 
     def prep_request(self, req, send_kw) -> bytes:
         msg = b'%s %s HTTP/1.1\r\n' % (req.method.encode(), req.path.encode())
-
-
         dh = default_headers()
         dh['Host'] = req.host
-        dh.update(req.headers)
-        dh.update(send_kw)
+        dh['Connection'] = req.headers.get('Connection') or 'closed'
 
         req_body = ''
         if req.method == 'POST':
@@ -206,14 +211,17 @@ class HttpSession(object):
                     req_body = urlencode(req.data)
 
             elif req.json:
-                req_body = json.dumps(req.json,separators=(',',':'))
+                req_body = json.dumps(req.json, separators=(',', ':'))
             dh['Content-Length'] = len(req_body)
 
-        for k,v in dh.items():
-            msg += ('%s: %s\r\n' % (k ,v)).encode()
+        dh.update(req.headers)
+        dh.update(send_kw)
+
+        for k, v in dh.items():
+            msg += ('%s: %s\r\n' % (k, v)).encode('latin1')
 
         msg += b'\r\n'
-        msg += req_body.encode()
+        msg += req_body.encode('latin1')
         vprint(msg.decode())
         return msg
 
@@ -243,7 +251,6 @@ class HttpSession(object):
         connpool, conn = self.get_conn(req, addr)
         conn.sendall(msg)
         response = Response()
-
         while 1:
             r = conn.recv()
             if not r:
@@ -261,13 +268,15 @@ class HttpSession(object):
             #头部没有长度字段
             if 'timeout' in connection:
                 pass
+
+
         response.request = req
         response.request.raw = msg
         set_cookie = response.headers.get('set-cookie')
         if set_cookie and update_cookies:
             self.handle_cookie(req, set_cookie)
 
-        response.cookies = response.headers.get('set-cookie', {})
+        response.cookies = self.cookies
         self._content = response.content
         if not conn.isclosed:
             connpool._put_conn(conn)
@@ -276,8 +285,12 @@ class HttpSession(object):
 
     @property
     def cookies(self):
-        _cookies = self.cookie_manger.get(self.active_addr)
+        _cookies = self.cookie_manger.get(get_top_domain(self.req.host))
         return _cookies
+
+    @cookies.setter
+    def cookies(self, value):
+        self.cookie_manger.cookies[get_top_domain(self.req.host)] = value
     def get(self, url, **kwargs):
         resp = self.request('GET', url, **kwargs)
         resp = self.handle_redirect(resp)
