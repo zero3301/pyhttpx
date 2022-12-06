@@ -22,6 +22,7 @@ from pyhttpx.exception import (
     TLSDecryptErrorExpetion,
     ConnectionTimeout,
     ConnectionClosed,
+    TLSHandshakeFailed,
     ReadTimeout)
 
 from pyhttpx.layers.tls.socks import SocketProxy
@@ -35,10 +36,9 @@ def default_context():
 
 class SSLContext:
 
-    def __init__(self, protocol):
+    def __init__(self, protocol=None, http2=True):
         self.protocol = protocol
         self.check_hostname: bool = False
-
         self.ciphers = None
         self.exts = None
         self.exts_payload = None
@@ -46,24 +46,39 @@ class SSLContext:
         self.supported_groups = None
         self.ec_points = None
         self.browser_type = None
-
+        self.http2 = http2
+        self.application_layer_protocol_negotitaion = 'http/1.1'
         self.tlsversion = b'\x03\x03'
 
-    def set_ja3(self, ja3=None):
+
+    def set_payload(self, browser_type=None, ja3=None, exts_payload=None):
+        self.browser_type = browser_type or 'chrome'
+        self.exts_payload = exts_payload
 
         if ja3:
-            self.protocol, self.ciphers, self.exts,self.supported_groups,self.ec_points = ja3.split(',')
-            self.ciphers = [int(i) for i in self.ciphers.split('-')]
-            self.exts = [int(i) for i in self.exts.split('-')]
-            self.supported_groups = [int(i) for i in self.supported_groups.split('-')]
-            self.ec_points = [int(i) for i in self.ec_points.split('-')]
+            self.ja3 = ja3
+        else:
+            if self.browser_type == 'chrome':
+
+                randarr = [6682,19018,64250, 47802]
+                exts = f'{randarr[1]}-65281-18-27-43-0-5-51-13-11-17513-35-45-23-16-10-{randarr[3]}-21'
+                self.ja3 = f"771,{randarr[0]}-4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,{exts},{randarr[2]}-29-23-24,0"
+                self.exts_payload = {47802: b'\x00'}
 
 
-            self.supported_groups = b''.join([struct.pack('!H', i) for i in self.supported_groups])
-            self.ec_points = b''.join([struct.pack('!B', i) for i in self.ec_points])
+            else:
+                #firefox_ja3
+                self.ja3 = "771,4865-4867-4866-49195-49199-52393-52392-49196-49200-49162-49161-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-34-51-43-13-45-28-21,29-23-24-25-256-257,0"
 
-    def set_ext_payload(self, data):
-        self.exts_payload = data
+        self.protocol, self.ciphers, self.exts, self.supported_groups, self.ec_points = self.ja3.split(',')
+        self.ciphers = [int(i) for i in self.ciphers.split('-')]
+        self.exts = [int(i) for i in self.exts.split('-')]
+        self.supported_groups = [int(i) for i in self.supported_groups.split('-')]
+        self.ec_points = [int(i) for i in self.ec_points.split('-')]
+
+        self.supported_groups = b''.join([struct.pack('!H', i) for i in self.supported_groups])
+        self.ec_points = b''.join([struct.pack('!B', i) for i in self.ec_points])
+
     def wrap_socket(self, sock=None, server_hostname=None):
         return TLSSocket(sock=sock,server_hostname=server_hostname, ssl=self)
 
@@ -114,8 +129,8 @@ class TLSSocket():
 
             self.sock.set_proxy(SocketProxy.HTTP, proxy_ip, proxy_port,username, password )
 
-
         try:
+            self.sock.settimeout(self.timeout)
             self.sock.connect((self.host, self.port))
 
         except (ConnectionRefusedError,TimeoutError,socket.timeout):
@@ -146,7 +161,7 @@ class TLSSocket():
             while len(head_flowtext) < length:
                 s = self.mutable_recv(recv_len)
                 if not s:
-                    raise ConnectionClosed('handshake failed, server closed connection')
+                    raise TLSHandshakeFailed('handshake failed')
 
                 head_flowtext += s
                 recv_len = length - len(head_flowtext)
@@ -160,7 +175,7 @@ class TLSSocket():
 
                 s = self.mutable_recv(recv_len)
                 if not s:
-                    raise ConnectionClosed('handshake failed, server closed connection')
+                    raise TLSHandshakeFailed('handshake failed')
                 flowtext += s
                 recv_len = length - len(flowtext)
 
@@ -169,7 +184,14 @@ class TLSSocket():
                     self.tls_cxt.handshake_data.append(flowtext)
                     self.servercontext.load(flowtext)
                     self.tls13 = True if self.servercontext.serverstore.ext.get(43) == b'\x03\x04' else False
+
                     self.tls_cxt.tls13 = self.tls13
+
+                    # handle application_layer_protocol_negotitaion
+                    if self.servercontext.serverstore.ext.get(16):
+                        alpn = self.servercontext.serverstore.ext.get(16)[3:]
+                        self.context.application_layer_protocol_negotitaion = alpn.decode('latin1')
+
 
                     if self.tls13:
                         self.server_change_cipher_spec = True
@@ -251,7 +273,16 @@ class TLSSocket():
                             pass
                         elif handshake_proto_type == 0x08:
                             #扩展
-                            pass
+                            payload = payload[2:]
+                            while payload:
+                                ext_type = payload[:2]
+                                extlen = struct.unpack('!H', payload[2:4])[0]
+                                data = payload[4:4+extlen]
+                                payload = payload[4+extlen:]
+                                if ext_type == b'\x00\x10':
+                                    self.context.application_layer_protocol_negotitaion = data[3:].decode('latin1')
+
+
 
                         elif handshake_proto_type == 0x04:
                             #ticket有可能接受多个,所以交个下一阶段处理
@@ -366,7 +397,7 @@ class TLSSocket():
                 p, t = p[:-1], p[-1]
                 if t == 22:
                     # ticket session
-                    vprint('ticket')
+                    pass
 
                 elif t == 23:
                     self.plaintext_reader += p

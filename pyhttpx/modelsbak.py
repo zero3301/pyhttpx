@@ -1,18 +1,10 @@
 import gzip
 import json
-import time
 from collections import OrderedDict,defaultdict
 import brotli
 from urllib.parse import urlparse,urlencode,quote,unquote,urlsplit
-import struct
+import copy
 
-from hpack import (
-    Encoder,
-    Decoder,
-    HeaderTuple,
-    InvalidTableIndex,
-
-)
 
 
 def path_url(url):
@@ -60,7 +52,7 @@ class Request(object):
 
         self.method = method
         self.url = url
-        self.headers = headers
+        self.headers = copy.deepcopy(headers)
         self.data = data
         self.json = json
         self.params = params
@@ -95,7 +87,7 @@ class Response(object):
         self.plaintext_buffer = b''
         self.headers = {}
         self.body = b''
-        self.content_length = None
+        self.content_length = 0
         self.encoding = 'utf-8'
         self.status_code = 200
         #chunked
@@ -174,7 +166,6 @@ class Response(object):
             else:
                 self._content = self.body
 
-
         content_encoding =  self.headers.get('content-encoding')
         if content_encoding == 'gzip':
             self._content = gzip.decompress(self._content)
@@ -185,7 +176,6 @@ class Response(object):
 
         else:
             self._content = self._content
-
         return self._content
 
     @property
@@ -199,118 +189,4 @@ class Response(object):
     def __repr__(self):
         template = '<Response status_code={status_code}>'
         return  template.format(status_code=self.status_code)
-
-class Http2Response(object):
-    def __init__(self):
-
-        self.plaintext_buffer = b''
-        self.body = b''
-
-        self.content_length = 0
-        self.encoding = 'utf-8'
-        self.status_code = 200
-        #chunked
-        self.transfer_encoding = 'chunked'
-        self.read_ended = False
-        self._content = b''
-        self.cookies = {}
-        self.hpack_encode = Encoder()
-        self.hpack_decode = Decoder()
-        self.cookie_dict = {}
-        self.headers = defaultdict(list)
-        self.content_length = None
-        self.stream_id = None
-
-
-    def flush(self, frame):
-
-        head, body = frame[:9],frame[9:]
-        self.stream_id = struct.unpack('!I', head[5:9])[0]
-        if frame[3] == 1:
-            # 头部
-            if body[:3] == b'\x3f\xe1\x5f':
-                #
-                i = 3
-            else:
-                i= 0
-            data = self.hpack_decode.decode(body[i:])
-
-            for h in data:
-                k,v = h
-                if k == 'set-cookie':
-                    self.headers[k].append(v)
-                else:
-                    self.headers[k] = v
-
-            if self.headers.get('content-length') != None:
-                self.content_length = int(self.headers.get('content-length', 0))
-            self.status_code = int(self.headers.get(':status', 200))
-
-        elif frame[3] == 0:
-            self.body += body
-
-            if head[4] == 1:
-                self.read_ended = True
-
-        elif frame[3] == 4:
-            # SETTINGS
-            pass
-        elif frame[3] == 8:
-            # WINDOW_UPDATE
-            pass
-        elif frame[3] == 2:
-            # PRIORITY
-            pass
-        elif frame[3] == 7:
-            # GOWAY
-            pass
-
-    @property
-    def content(self):
-        if self._content:
-            return self._content
-        else:
-            if self.headers.get('transfer-encoding') == self.transfer_encoding :
-                str_chunks = self.body
-                html = b''
-                m = memoryview(str_chunks)
-                right = 0
-                left = 0
-                while len(str_chunks) > right:
-                    index = str_chunks.index(b'\r\n', right)
-                    right = index
-                    l = int(m[left:right].tobytes(), 16)
-                    html += m[right + 2:right + 2 + l]
-                    right = right + 2 + l + 2
-                    left = right
-
-                self._content = html
-            else:
-                self._content = self.body
-
-        content_encoding =  self.headers.get('content-encoding')
-        if content_encoding == 'gzip':
-            self._content = gzip.decompress(self._content)
-
-        elif content_encoding == 'br':
-
-            self._content = brotli.decompress(self._content)
-
-        else:
-            self._content = self._content
-
-        return self._content
-
-    @property
-    def text(self):
-        return self.content.decode(encoding=self.encoding)
-
-    @property
-    def json(self):
-        return json.loads(self.text)
-
-    def __repr__(self):
-        template = '<Response status_code={status_code}>'
-        return  template.format(status_code=self.status_code)
-
 

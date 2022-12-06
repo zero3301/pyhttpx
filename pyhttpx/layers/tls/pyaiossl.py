@@ -188,7 +188,7 @@ class TLSSocket:
             elif handshake_type == 0x15:
                 self.isclosed = True
                 exc_alert = True
-                raise ConnectionClosed('tcp encrypted alert closed')
+                raise ConnectionClosed('server closed')
 
         b = self.plaintext_reader
         self.plaintext_reader = b''
@@ -204,10 +204,11 @@ def default_context():
 
 
 class SSLContext:
-    def __init__(self, protocol):
+    def __init__(self, protocol=None, http2=True):
         self.protocol = protocol
         self.check_hostname: bool = False
-
+        self.browser_type = 'chrome'
+        self.http2 = False
         self.ciphers = None
         self.exts = None
         self.exts_payload = None
@@ -215,19 +216,33 @@ class SSLContext:
         self.supported_groups = None
         self.ec_points = None
 
-    def set_ja3(self, ja3=None):
+    def set_payload(self, browser_type=None, ja3=None, exts_payload=None):
+        self.browser_type = browser_type or 'chrome'
+        self.exts_payload = exts_payload
         if ja3:
-            self.protocol, self.ciphers, self.exts,self.supported_groups,self.ec_points = ja3.split(',')
-            self.ciphers = [int(i) for i in self.ciphers.split('-')]
-            self.exts = [int(i) for i in self.exts.split('-')]
-            self.supported_groups = [int(i) for i in self.supported_groups.split('-')]
-            self.ec_points = [int(i) for i in self.ec_points.split('-')]
+            self.ja3 = ja3
 
-            self.supported_groups = b''.join([struct.pack('!H', i) for i in self.supported_groups])
-            self.ec_points = b''.join([struct.pack('!B', i) for i in self.ec_points])
+        else:
+            if self.browser_type == 'chrome':
 
-    def set_ext_payload(self, data):
-        self.exts_payload = data
+                randarr = [6682, 19018, 64250, 47802]
+                self.ja3 = f"771,{randarr[0]}-4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,{randarr[1]}-18-65281-27-16-5-13-10-11-0-45-35-51-23-43-{randarr[3]}-21,{randarr[2]}-29-23-24,0"
+                self.exts_payload = {47802: b'\x00'}
+
+
+            else:
+                # firefox_ja3
+                self.ja3 = "771,4865-4867-4866-49195-49199-52393-52392-49196-49200-49162-49161-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-34-51-43-13-45-28-21,29-23-24-25-256-257,0"
+
+        self.protocol, self.ciphers, self.exts, self.supported_groups, self.ec_points = self.ja3.split(',')
+        self.ciphers = [int(i) for i in self.ciphers.split('-')]
+        self.exts = [int(i) for i in self.exts.split('-')]
+        self.supported_groups = [int(i) for i in self.supported_groups.split('-')]
+        self.ec_points = [int(i) for i in self.ec_points.split('-')]
+
+        self.supported_groups = b''.join([struct.pack('!H', i) for i in self.supported_groups])
+        self.ec_points = b''.join([struct.pack('!B', i) for i in self.ec_points])
+
     def wrap_socket(self, sock=None, server_hostname=None):
 
         return TLSSocket(sock=sock,server_hostname=server_hostname, ssl=self)

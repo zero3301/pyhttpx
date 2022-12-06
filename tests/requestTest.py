@@ -1,3 +1,5 @@
+import re
+
 import pyhttpx
 import time
 import json
@@ -10,7 +12,6 @@ import threading
 import requests
 
 headers={
-
 'Connection': 'keep-alive',
 'Pragma': 'no-cache',
 'Cache-Control': 'no-cache',
@@ -29,11 +30,15 @@ headers={
 
 
 def main():
-    sess = pyhttpx.HttpSession()
-    r = sess.get('https://tls.peet.ws/api/all')
+    #默认开启http2
+    sess = pyhttpx.HttpSession(http2=True)
+    url='https://tls.peet.ws/api/all'
+    r = sess.post(url,headers=headers, cookies='a=123;b=2',json={'a': 1})
+    print(r.status_code)
     print(r.text)
 if __name__ == '__main__':
     main()
+
 
 
 

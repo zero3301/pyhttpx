@@ -6,7 +6,10 @@ install_requires = [
     "cryptography==36.0.1",
     "rsa==4.8",
     "pyOpenSSL==21.0.0",
-    "brotli"]
+    "brotli",
+    "hpack==4.0.0",
+
+]
 
 test_requirements = [
     "pytest>=3",
@@ -29,10 +32,10 @@ class PyTest(TestCommand):
 packages = find_packages()
 setup(
     name = "pyhttpx",
-    version = "1.3.32",
+    version = "2.0.0",
     keywords = ["pip", "pyhttpx"],
     description = "HTTP library.",
-    long_description = "HTTP library.",
+    long_description = "HTTP library, TLS supported version：tls1.2/tls1.3, HTTP supported version: http1.1/http2",
     license = "MIT Licence",
 
     url = "https://github.com/zero3301/pyhttpx",

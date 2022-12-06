@@ -107,19 +107,41 @@ class ExtApplicationLayerProtocolNegotiation(_BaseExtension):
     #应用层协议扩展,暂不支持http2
     _type = 0x10
     payload = '\x00\x09\x08http/1.1'
+    #h2
+    #payload = bytes.fromhex('000c02683208687474702f312e31')
     fields_desc = [
         _type,
         payload,
     ]
 
+    def dump(self, host, context):
+
+        if context.http2:
+            payload = bytes.fromhex('000c02683208687474702f312e31')
+        else:
+            payload = bytes.fromhex('000908687474702f312e31')
+        self.fields_desc[1] = payload
+
+        return super().dump(host, context)
+
 class ExtApplicationSettings(_BaseExtension):
-    #chrome暂不支持http2
+
     _type = 0x4469
     payload = bytes.fromhex('0003026831')
+    #payload = bytes.fromhex('0003026832')
     fields_desc = [
         _type,
         payload,
     ]
+    def dump(self, host, context):
+        if context.http2:
+            payload = bytes.fromhex('0003026832')
+        else:
+            payload = bytes.fromhex('0003026831')
+        self.fields_desc[1] = payload
+
+        return super().dump(host, context)
+
 
 class ExtStatusRequest(_BaseExtension):
     _type = 0x05
@@ -203,8 +225,10 @@ class ExtSupportdVersions(_BaseExtension):
         payload,
     ]
     def dump(self, host, context):
+
         if context.browser_type == 'chrome':
             self.payload = '\x06\xda\xda\x03\x04\x03\x03'
+            #self.payload = '\x02\x03\x03'
         else:
             self.payload = '\x04\x03\x04\x03\x03'
 

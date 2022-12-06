@@ -2,6 +2,10 @@
 基于socket开发的一个网络库,供研究https/tls参考
 如果你用过requests,它将会变得非常容易
 
+# 版本协议支持
+- tls1.2/tls1.3
+- h1/h2
+
 PyPI:
 ```
 $ python -m pip install --upgrade pip
@@ -17,7 +21,23 @@ cryptography==36.0.1
 rsa==4.8
 pyOpenSSL==21.0.0
 brotli==1.0.9
+hpack==4.0.0
+```
+## 查看tls指纹
+- 在线查看,https://tls.peet.ws/api/all
+- 或者下载wireshark,查看完整握手流程，如果服务器返回已实现的密码套件,可随意魔改client hello包
 
+
+
+## HttpSession 
+- 方式一: 使用内置ja3
+- 方式二: 指定ja3= '771,...',使用此方式需要抓包分析,并确保扩展协议不带41
+
+```
+>>>sess = pyhttpx.HttpSession(browser_type='chrome', http2=True)
+>>>r = sess.get('https://tls.peet.ws/api/all')
+>>>r.text
+... "ja3": "771,4865-4866...
 ```
 
 ## GET
@@ -61,34 +81,7 @@ b'GET /get HTTP/1.1\r\nHost: httpbin.org ...
 >>> r = sess.post('https://httpbin.org/get',allow_redirects=True)
 ```  
 
-## 查看tls指纹
-- https://tls.peet.ws/api/all
-- 下载wireshark,查看完整握手流程，如果服务器返回已实现的密码套件,可随意魔改client hello包
-- ja3和User-Agent建议使用同一个浏览器的信息
 
-### 如何禁用firefox的tls1.3, 强制tls1.2
-
-    地址栏输入: about:config,
-    搜索tls,将security.tls.version.max的值改为3即可
-
-
-### 如何禁用firefox的http2,强制http/1.1
-    
-    地址栏输入: about:config,
-    搜索http2,将network.http.spdy.enabled.http2的值改为false即可
-
-
-**HttpSession 可选参数说明**
-
-ja3: 指纹构成
-browser_type: chrome or firefox
-
-```
->>>sess = pyhttpx.HttpSession(browser_type='chrome')
->>>r = sess.get('https://tls.peet.ws/api/all')
->>>r.text
-... "ja3": "771,4865-4866...
-```
 
 # 支持ssl上下文
 
@@ -108,14 +101,11 @@ browser_type: chrome or firefox
 b'HTTP/1.0 200 OK\r\n'...
 ```
 
-# websocket,支持修改ja3
+# websocket
 
     参考文档tests/test_websockt.py
     
-# 版本支持
 
-- tls1.2/tls1.3
-- http/1.1
 
 # tls密码套件支持
 - TLS13_AES_128_GCM_SHA256(0X1301)

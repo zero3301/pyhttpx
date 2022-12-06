@@ -36,12 +36,11 @@ class SocketProxy(socket.socket):
         ]
 
         if username and password:
-            http_headers.append(b"Proxy-Authorization: basic "
+            http_headers.append(b"Proxy-Authorization: Basic "
                                 + b64encode(username.encode('latin1') + b":" + password.encode('latin1')))
 
         http_headers.append(b"\r\n")
         try:
-
             super(SocketProxy, self).connect((proxy_addr, proxy_port))
 
         except (socket.timeout, ConnectionRefusedError):
@@ -60,26 +59,25 @@ class SocketProxy(socket.socket):
         if status_code != 200:
             error = ''
             #Tunnel connection failed: 502 Proxy Bad Server
-            if status_code in [400, 403, 405]:
+            if status_code in (400, 403, 405):
                 error = "The HTTP proxy server may not be supported"
 
             elif status_code in (407,):
-
                 error =f'Tunnel connection failed: status_code = {status_code},Unauthorized'
+
             else:
                 error = f'Tunnel connection failed: status_msg = {status_line}'
 
             raise ProxyError(error)
-
-
         return True
+
 if __name__ == '__main__':
     sock  = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
     s = SocketProxy()
     s.set_proxy(1, '127.0.0.1', 7890)
     s.connect(('www.baidu.com',443))
-
     print(s)
     print(s.getsockname())
+
 
 

@@ -12,7 +12,7 @@ from pyhttpx.layers.tls.pyaiossl import SSLContext,PROTOCOL_TLSv1_2
 from pyhttpx.exception import (
     SwitchingProtocolError,
     SecWebSocketKeyError,
-    WebSocketClosedError
+    WebSocketClosed
 )
 
 DEFAULT_HEADERS = {
@@ -67,12 +67,12 @@ class WebSocketClient:
 
     async def connect(self):
         context = SSLContext(PROTOCOL_TLSv1_2)
-        context.set_ja3(self.ja3)
-        context.set_ext_payload(self.exts_payload)
+
+        context.set_payload(browser_type='chrome', ja3=self.ja3, exts_payload=self.exts_payload)
+
         self.sock = context.wrap_socket()
         await self.sock.connect(self.addres)
-        #self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-        #self.sock.connect(self.addres)
+
         await self.on_open()
         self.open = True
 
@@ -86,14 +86,13 @@ class WebSocketClient:
         data = data.decode()
         proto, status_code = data.split('\r\n',1)[0].split(' ')[:2]
         head = {}
+
         if status_code == '101':
             for i in data.split('\r\n')[1:]:
                 k, v = i.split(':', 1)
                 k, v = k.strip(), v.strip()
                 head[k.lower()] = v
 
-            # verify
-            # sec = b64(sha258EAFA5-E914-47DA-95CA-C5AB0DC85B11)
             sec_websocket_key = self.sec_websocket_key + '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
             sec_websocket_accept = head['sec-websocket-accept']
 
@@ -105,8 +104,8 @@ class WebSocketClient:
 
     async def on_open(self):
 
-        self.sec_websocket_key = base64.b64encode(os.urandom(20)).decode()
-        self.headers['Sec-Websocket-Key'] = self.sec_websocket_key
+        self.sec_websocket_key = base64.b64encode(os.urandom(16)).decode()
+        self.headers['Sec-WebSocket-Key'] = self.sec_websocket_key
 
         request_header = [f'GET {self.path} HTTP/1.1']
         for k,v in self.headers.items():
@@ -116,7 +115,8 @@ class WebSocketClient:
         request_header += '\r\n\r\n'
 
         await self.sock.sendall(request_header.encode())
-        data = await self.sock.recv(4096)
+        data = await self.sock.recv(2**12)
+
         self.head_data, self.body_data = data.split(b'\r\n\r\n',1)
         self.check_proto(self.head_data)
 
@@ -213,7 +213,7 @@ class WebSocketClient:
         elif opcode == 0x08:
             self.open = False
             await self.close()
-            raise WebSocketClosedError(f'webscoket Closed opcode={opcode}')
+            raise WebSocketClosed(f'webscoket Closed')
 
         elif opcode == 0x9:
             # 收到ping,发送pong
@@ -242,11 +242,11 @@ class WebSocketClient:
                 data = await self.sock.recv(2 ** 14)
             except ConnectionResetError:
                 self.open = False
-                raise WebSocketClosedError('webscoket Closed')
+                raise WebSocketClosed('webscoket Closed')
             else:
                 if data is None:
                     self.open = False
-                    raise WebSocketClosedError('webscoket Closed')
+                    raise WebSocketClosed('webscoket Closed')
                 await self.flush(data)
 
 

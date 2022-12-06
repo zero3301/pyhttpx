@@ -5,6 +5,8 @@ class BaseExpetion(Exception):
 class TLSVerifyDataExpetion(BaseExpetion):
     pass
 
+class TLSHandshakeFailed(BaseExpetion):
+    pass
 class TLSDecryptErrorExpetion(BaseExpetion):
     pass
 
@@ -35,7 +37,7 @@ class SwitchingProtocolError(BaseExpetion):
     pass
 class SecWebSocketKeyError(BaseExpetion):
     pass
-class WebSocketClosedError(BaseExpetion):
+class WebSocketClosed(BaseExpetion):
     pass
 
 class ProxyError(IOError):

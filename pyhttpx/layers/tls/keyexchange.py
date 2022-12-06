@@ -28,7 +28,7 @@ class ServerStore:
 
 
         if cipher_suit is None:
-            raise TLSCipherNotSupportedErrorExpetion(f'协商出错,密码套件不支持 {self.cipher_suit.hex()}')
+            raise TLSCipherNotSupportedErrorExpetion(f'negotiation error, the cipher suite does not support {self.cipher_suit.hex()}')
 
         self.cipher_name = TLS_SUITES.get(int(self.cipher_suit.hex(), 16))['name']
         ext_len = struct.unpack('!H',flowtext[3:5])[0]
@@ -42,12 +42,11 @@ class ServerStore:
             self.ext[ext_type] = val
             ext_datas = ext_datas[4+el:]
 
-
         return self
 
 class CertificateContext:
     rsa_pulicKey = None
-    def load(self,flowtext,serverstore):
+    def load(self,flowtext, serverstore):
         first_cer_length = b'\x00' + flowtext[7:10]
         first_cer_length = struct.unpack('!I',first_cer_length)[0]
         cert = flowtext[10:10 + first_cer_length]
