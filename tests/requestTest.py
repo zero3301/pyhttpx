@@ -31,9 +31,9 @@ headers={
 
 def main():
     #默认开启http2
-    sess = pyhttpx.HttpSession(http2=True)
+    sess = pyhttpx.HttpSession(http2=True, browser_type='chrome')
     url='https://tls.peet.ws/api/all'
-    r = sess.post(url,headers=headers, cookies='a=123;b=2',json={'a': 1})
+    r = sess.post(url,headers=headers)
     print(r.status_code)
     print(r.text)
 if __name__ == '__main__':
