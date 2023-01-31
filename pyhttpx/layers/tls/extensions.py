@@ -231,7 +231,6 @@ class ExtSupportdVersions(_BaseExtension):
             #self.payload = '\x02\x03\x03'
         else:
             self.payload = '\x04\x03\x04\x03\x03'
-
         self.fields_desc[1] = self.payload
 
         return super().dump(host, context)

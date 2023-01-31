@@ -51,7 +51,7 @@ log = logging.getLogger(__name__)
 
 class Conf:
     debug = False
-    max_allow_redirects = 20
+    max_allow_redirects = 5
 
 def vprint(*args):
     if Conf.debug:

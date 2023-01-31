@@ -231,8 +231,12 @@ class Http2Response(object):
             if body[:3] == b'\x3f\xe1\x5f':
                 #
                 i = 3
+
+            elif body[:4] == b'?\xe1\xff\x03':
+                i = 4
             else:
                 i= 0
+
             data = self.hpack_decode.decode(body[i:])
 
             for h in data:

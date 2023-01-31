@@ -42,14 +42,14 @@ class SocketProxy(socket.socket):
         http_headers.append(b"\r\n")
         try:
             super(SocketProxy, self).connect((proxy_addr, proxy_port))
-
+            self.sendall(b"\r\n".join(http_headers))
+            status_line = self.recv(1024).decode()
+            proto, status_code, status_msg = status_line.split(" ", 2)
         except (socket.timeout, ConnectionRefusedError):
             raise ProxyError(
                 "Proxy server connection time out")
 
-        self.sendall(b"\r\n".join(http_headers))
-        status_line = self.recv(1024).decode()
-        proto, status_code, status_msg = status_line.split(" ", 2)
+
 
         if not proto.startswith("HTTP/"):
             raise ProxyError(

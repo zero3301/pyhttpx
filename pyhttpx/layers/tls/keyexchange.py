@@ -69,7 +69,7 @@ class ServerContext:
         self.serverpubkey = None
 
 
-    def load(self,flowtext):
+    def load(self, flowtext):
         handshake_type = struct.unpack('!B',flowtext[:1])[0]
         if handshake_type == 0x02:
             #server hello

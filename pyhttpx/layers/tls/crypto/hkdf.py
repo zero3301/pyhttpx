@@ -122,6 +122,8 @@ class TLS13_HKDF(object):
         secrets['tls13_master_secret'] = tls13_master_secret
         secrets['client_handshake_traffic_secret'] = client_handshake_traffic_secret
         secrets['server_handshake_traffic_secret'] = server_handshake_traffic_secret
+        secrets['client_application_traffic_secret'] = client_application_traffic_secret
+        secrets['server_application_traffic_secret'] = server_application_traffic_secret
         secrets['client_handshake_write_key'] = client_handshake_write_key
         secrets['client_handshake_write_iv'] = client_handshake_write_iv
         secrets['server_handshake_write_key'] = server_handshake_write_key

@@ -12,14 +12,13 @@ import threading
 import requests
 
 headers={
-'Connection': 'keep-alive',
+'Host': 'ccie.cloudapps.cisco.com',
 'Pragma': 'no-cache',
 'Cache-Control': 'no-cache',
-'sec-ch-ua': '"Google Chrome";v="107", "Chromium";v="107", "Not=A?Brand";v="24"',
 'sec-ch-ua-platform': '"Windows"',
 'sec-ch-ua-mobile': '?0',
-'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
-'Content-type': 'application/x-www-form-urlencoded',
+'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+#'Content-type': 'application/x-www-form-urlencoded',
 'Accept': '*/*',
 'Sec-Fetch-Site': 'cross-site',
 'Sec-Fetch-Mode': 'cors',
@@ -31,11 +30,21 @@ headers={
 
 def main():
     #默认开启http2
-    sess = pyhttpx.HttpSession(http2=True, browser_type='chrome')
+    #tls1.2
+    ja3='771,49195-49199-52393-52392-49196-49200-49162-49161-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-13-28,29-23-24-25,0'
+    sess = pyhttpx.HttpSession(http2=False,
+                               #ja3=ja3,
+                               browser_type='chrome')
+
     url='https://tls.peet.ws/api/all'
-    r = sess.post(url,headers=headers)
+    #url = 'https://httpbin.org/get'
+
+    r = sess.get(url,headers=headers,
+                 allow_redirects=True,
+                 )
     print(r.status_code)
     print(r.text)
+
 if __name__ == '__main__':
     main()
 

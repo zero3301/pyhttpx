@@ -1,3 +1,4 @@
+import time
 from collections import namedtuple
 import hashlib
 import struct
@@ -50,7 +51,7 @@ class TLSSessionCtx(object):
         self.server = not self.client
         self.client_ctx = TLSContext("Client TLS context")
         self.server_ctx = TLSContext("Server TLS context")
-
+        self.certificate_request = False
         self.negotiated = namedtuple("negotiated", ["ciphersuite", "key_exchange", "encryption", "mac", "compression",
                                                     "compression_algo", "version", "sig", "resumption"])
         self.negotiated.ciphersuite = None
@@ -148,8 +149,6 @@ class TLSSessionCtx(object):
         elif hmac_alg == 'HMAC-SHA256':
             self.hmac_alg = hashlib.sha256
 
-
-
         if self.tls13:
             #hash_name = 'SHA256'
 
@@ -163,9 +162,7 @@ class TLSSessionCtx(object):
         self.hmac_alg = hmac_alg
         self.negotiated_premaster_secret()
 
-
     def load_key(self):
-
         key_len = self.cls_cipher_alg.key_len
         cipher_type = self.cls_cipher_alg.type
         fixed_iv_len = self.cls_cipher_alg.fixed_iv_len
@@ -174,14 +171,11 @@ class TLSSessionCtx(object):
         self.make_master_secret()
         self.key_expandsion()
 
-
         if cipher_type == 'aead':
             self.client_write_key = self.key_block[:key_len]
             self.server_write_key = self.key_block[key_len:key_len * 2]
             self.client_fixed_iv = self.key_block[key_len * 2:key_len * 2 + fixed_iv_len]
             self.server_fixed_iv = self.key_block[key_len * 2 + fixed_iv_len:key_len * 2 + fixed_iv_len * 2]
-
-
 
         elif cipher_type == 'block':
             self.client_mac_key = self.key_block[:mac_key_len]
@@ -246,6 +240,7 @@ class TLSSessionCtx(object):
 
     def get_verify_data(self, data=None):
         #对于cbc-sha,tls1.2中,hmac采用sha1,消息摘要用sha256
+
         handshake = self.hash_alg(b''.join(self.handshake_data)).digest()
         label = b"client finished"
         plaintext = prf(self.master_secret, label + handshake, self.hash_alg, outlen=12)
@@ -268,6 +263,7 @@ class TLSSessionCtx(object):
 
 
     def compute_verify_data(self):
+
         verify_data = self.hkdf.compute_verify_data(
             self.secrets['client_handshake_traffic_secret'], b''.join(self.handshake_data))
 
@@ -282,6 +278,23 @@ class TLSSessionCtx(object):
             x25519.X25519PublicKey.from_public_bytes(server_publickey))
 
         self.secrets = self.hkdf.make_secret(self.premaster_secret, self.handshake_data)
+
+        client_handshake_traffic_secret = self.secrets['client_handshake_traffic_secret']
+        server_handshake_traffic_secret = self.secrets['server_handshake_traffic_secret']
+
+        sslkey_file_name = os.environ.get('SSLKEYLOGFILE')
+        if sslkey_file_name:
+            with open(sslkey_file_name, 'a') as f:
+                s = f'CLIENT_HANDSHAKE_TRAFFIC_SECRET {self.client_ctx.random.hex()} {client_handshake_traffic_secret.hex()}\n' \
+                    f'SERVER_HANDSHAKE_TRAFFIC_SECRET {self.client_ctx.random.hex()} {server_handshake_traffic_secret.hex()}\n' \
+                    f'CLIENT_TRAFFIC_SECRET_0 {self.client_ctx.random.hex()} {self.secrets["client_application_traffic_secret"].hex()}\n' \
+                    f'SERVER_TRAFFIC_SECRET_0 {self.client_ctx.random.hex()} {self.secrets["server_application_traffic_secret"].hex()}\n'
+
+                f.write(s)
+
+
+        import time
+        #time.sleep(11111)
         self.server_handshake_write_key = self.secrets['server_handshake_write_key']
         self.server_handshake_write_iv = self.secrets['server_handshake_write_iv']
         self.client_handshake_write_key = self.secrets['client_handshake_write_key']
@@ -295,6 +308,7 @@ class TLSSessionCtx(object):
         self.server_ctx.crypto_alg = self.cls_cipher_alg(self.server_handshake_write_key, self.server_handshake_write_iv)
 
     def derive_application_traffic_secret(self):
+
 
         client_application_traffic_secret = self.hkdf.derive_secret(self.tls13_master_secret,
                                                                     b"c ap traffic",
@@ -431,7 +445,6 @@ class TLSSessionCtx13(TLSSessionCtx):
     def compute_verify_data(self):
         verify_data = self.hkdf.compute_verify_data(
             self.secrets['client_handshake_traffic_secret'], b''.join(self.handshake_data))
-
 
         #verify_data_len=3byte
         verify_data  = b'\x14' + struct.pack("!I", len(verify_data))[1:] + verify_data + b'\x16'
