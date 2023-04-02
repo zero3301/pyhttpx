@@ -9,7 +9,7 @@ import platform
 import sys
 import importlib
 import threading
-
+import random
 import asyncio
 import os
 import socket
@@ -213,26 +213,70 @@ class SSLContext:
         self.exts = None
         self.exts_payload = None
         self.supported_groups = None
-        self.supported_groups = None
         self.ec_points = None
 
-    def set_payload(self, browser_type=None, ja3=None, exts_payload=None):
+    def set_payload(self, browser_type=None,
+                    ja3=None,
+                    exts_payload=None,
+                    shuffle_extension_protocol=None):
         self.browser_type = browser_type or 'chrome'
         self.exts_payload = exts_payload
+        self.shuffle_extension_protocol = shuffle_extension_protocol
+        #https://www.rfc-editor.org/rfc/rfc8701
+        grease_list = [
+            0x0A0A, 0x1A1A,
+            0x2A2A, 0x3A3A,
+            0x4A4A, 0x5A5A,
+            0x6A6A, 0x7A7A,
+            0x8A8A, 0x9A9A,
+            0xAAAA, 0xBABA,
+            0xCACA, 0xDADA,
+            0xEAEA, 0xFAFA,
+        ]
+        def choose_grease():
+
+            e = random.choice(grease_list)
+            grease_list.remove(e)
+            return e
+
         if ja3:
             self.ja3 = ja3
+            if self.browser_type == 'chrome':
+                #规范ja3
+                tmp = self.ja3.split(',')
+                self.grease_group = int(tmp[3].split('-')[0])
+                supported_groups = [23,24,25,29,256,257]
+
+                if self.grease_group in supported_groups:
+                    self.grease_group = choose_grease()
+                    tmp[3] = f'{self.grease_group}-{tmp[3]}'
+                self.ja3 = ','.join(tmp)
+
 
         else:
             if self.browser_type == 'chrome':
 
-                randarr = [6682, 19018, 64250, 47802]
-                self.ja3 = f"771,{randarr[0]}-4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,{randarr[1]}-18-65281-27-16-5-13-10-11-0-45-35-51-23-43-{randarr[3]}-21,{randarr[2]}-29-23-24,0"
-                self.exts_payload = {47802: b'\x00'}
+                grease_ciphers = choose_grease()
+                grease_ext1 = choose_grease()
+                grease_ext2 = choose_grease()
+                self.grease_group = choose_grease()
+                exts = [grease_ext1,65281,18,27,43,0,5,51,13,11,17513,35,45,23,16,10,grease_ext2,21]
+                if self.shuffle_extension_protocol:
+                    random.shuffle(exts)
+
+                exts = '-'.join(map(lambda x:str(x), exts))
+                self.ja3 = f"771,{grease_ciphers}-4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,{exts},{self.grease_group}-29-23-24,0"
+                self.exts_payload = {grease_ext2: b'\x00'}
 
 
             else:
-                # firefox_ja3
-                self.ja3 = "771,4865-4867-4866-49195-49199-52393-52392-49196-49200-49162-49161-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-34-51-43-13-45-28-21,29-23-24-25-256-257,0"
+                #firefox_j,a3
+                exts=[0,23,65281,10,11,35,16,5,34,51,43,13,45,28,21]
+                if self.shuffle_extension_protocol:
+                    random.shuffle(exts)
+                exts = '-'.join(map(lambda x:str(x), exts))
+                self.ja3 = f"771,4865-4867-4866-49195-49199-52393-52392-49196-49200-49162-49161-49171-49172-156-157-47-53,{exts},29-23-24-25-256-257,0"
+
 
         self.protocol, self.ciphers, self.exts, self.supported_groups, self.ec_points = self.ja3.split(',')
         self.ciphers = [int(i) for i in self.ciphers.split('-')]
@@ -242,6 +286,7 @@ class SSLContext:
 
         self.supported_groups = b''.join([struct.pack('!H', i) for i in self.supported_groups])
         self.ec_points = b''.join([struct.pack('!B', i) for i in self.ec_points])
+
 
     def wrap_socket(self, sock=None, server_hostname=None):
 

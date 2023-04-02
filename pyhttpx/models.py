@@ -80,7 +80,7 @@ class Request(object):
         self.scheme = self.parse_url.scheme
         self.path = encode_params(self.url, self.params)
         if self.scheme != 'https':
-            raise TypeError('only supports https')
+            raise TypeError(f'only supports https: {self.url}')
 
 
     def __repr__(self):
@@ -136,7 +136,7 @@ class Response(object):
 
         if self.headers:
             if self.transfer_encoding == self.headers.get('transfer-encoding'):
-                #chunked
+                #chunked 
                 if self.plaintext_buffer.endswith(b'0\r\n\r\n'):
                     self.body = self.plaintext_buffer
                     self.read_ended = True

@@ -33,6 +33,7 @@ class IgnoreCaseDict(defaultdict):
 
 def default_headers():
     h = {
+    'Host': '*',
     'Connection': 'keep-alive',
     'Pragma': 'no-cache',
     'Cache-Control': 'no-cache',

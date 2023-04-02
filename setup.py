@@ -32,7 +32,7 @@ class PyTest(TestCommand):
 packages = find_packages()
 setup(
     name = "pyhttpx",
-    version = "2.0.8",
+    version = "2.10.1",
     keywords = ["pip", "pyhttpx"],
     description = "HTTP library.",
     long_description = "HTTP library, TLS supported version：tls1.2/tls1.3, HTTP supported version: http1.1/http2",

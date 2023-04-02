@@ -18,7 +18,7 @@ from pyhttpx.compat import *
 from pyhttpx.models import Request
 from pyhttpx.utils import default_headers,log,Conf
 from pyhttpx.models import Response,Http2Response
-from pyhttpx.exception import TooManyRedirects
+from pyhttpx.exception import TooManyRedirects,ConnectionClosed
 
 
 from hpack import (
@@ -63,14 +63,18 @@ class HTTPSConnectionPool:
         self.ja3 = kwargs.get('ja3')
         self.browser_type = kwargs.get('browser_type')
         self.exts_payload = kwargs.get('exts_payload')
+
         self.http2 = kwargs.get('http2')
         self.poolconnections = LifoQueue(maxsize=self.maxsize)
         self.lock = RLock()
+        self.shuffle_extension_protocol = kwargs.get('shuffle_extension_protocol')
 
     def _new_conn(self):
 
         context = pyssl.SSLContext(http2=self.http2)
-        context.set_payload(self.browser_type,self.ja3,self.exts_payload)
+        context.set_payload(self.browser_type, self.ja3, self.exts_payload,
+                            self.shuffle_extension_protocol
+                            )
         conn = context.wrap_socket(
             sock=None,server_hostname=None)
 
@@ -105,7 +109,11 @@ class HTTPSConnectionPool:
 
 
 class HttpSession(object):
-    def __init__(self, ja3=None, exts_payload=None, browser_type=None, http2=True):
+    def __init__(self, ja3=None,
+                 exts_payload=None,
+                 browser_type=None,
+                 http2=True ,
+                 shuffle_extension_protocol=False):
         #默认开启http2, 最终协议由服务器协商完成
         self.http2 = http2
         self.tls_session = None
@@ -117,7 +125,7 @@ class HttpSession(object):
         self.exts_payload = exts_payload
         self.lock = RLock()
         self.ja3 = ja3
-
+        self.shuffle_extension_protocol = shuffle_extension_protocol
     def handle_cookie(self, req, set_cookies):
         #
         if not set_cookies:
@@ -159,16 +167,16 @@ class HttpSession(object):
 
         )
         self.req = req
-        if req.headers.get('Cookie'):
-            self.handle_cookie(req ,req.headers.get('Cookie'))
 
         if cookies:
             self.handle_cookie(req, cookies)
-
-        _cookies = self.cookie_manger.get(get_top_domain(self.req.host))
+            _cookies = cookies
+        else:
+            _cookies = self.cookie_manger.get(get_top_domain(self.req.host))
         send_kw  = {}
+
         if _cookies:
-            send_kw['Cookie'] = '; '.join('{}={}'.format(k,v) for k,v in _cookies.items())
+            send_kw['cookie'] = '; '.join('{}={}'.format(k,v) for k,v in _cookies.items())
 
 
         #if conn.context.application_layer_protocol_negotitaion
@@ -210,8 +218,8 @@ class HttpSession(object):
         msg = b'%s %s HTTP/1.1\r\n' % (req.method.encode('latin1'), req.path.encode('latin1'))
         dh = copy.deepcopy(req.headers) or default_headers()
         dh.update(send_kw)
-
-        dh['Host'] = req.host
+        dh['host'] = req.host
+        dh=dict((k.lower(), v) for k, v in dh.items())
         req_body = ''
 
         if req.method == 'POST':
@@ -225,7 +233,11 @@ class HttpSession(object):
             elif req.json:
                 req_body = json.dumps(req.json, separators=(',', ':'))
 
-            dh['Content-Length'] = len(req_body)
+            dh['content-length'] = len(req_body)
+
+        else:
+            if dh.get('content-length'):
+                del dh['content-length']
 
         for k, v in dh.items():
             msg += ('%s: %s\r\n' % (k, v)).encode('latin1')
@@ -249,6 +261,7 @@ class HttpSession(object):
                                            exts_payload=self.exts_payload,
                                            browser_type = self.browser_type,
                                            http2 = self.http2,
+                                           shuffle_extension_protocol =self.shuffle_extension_protocol
 
                                            )
 
@@ -282,7 +295,7 @@ class HttpSession(object):
 
             #头部没有长度字段
             if 'timeout' in connection:
-                pass
+                break
 
         response.request = req
         response.request.raw = msg
@@ -296,6 +309,9 @@ class HttpSession(object):
                 c[k] = v
         response.cookies = c
         self._content = response.content
+        if not response.headers:
+            raise ConnectionClosed('Unknown response')
+
         if not self.conn.isclosed:
             self.connpool._put_conn(self.conn)
 
@@ -411,7 +427,6 @@ class HttpSession(object):
                             # goway
                             # conn.sendall(bytes.fromhex('0000080700000000000000000000000000'))
                             pass
-
                         elif frame[3] == 4:
                             # setting
                             if frame[4] == 1:
@@ -448,6 +463,8 @@ class HttpSession(object):
                 c[k] = v
         response.cookies = c
         self._content = response.content
+        if not response.headers:
+            raise ConnectionClosed('Unknown response')
         return response
 
     @property

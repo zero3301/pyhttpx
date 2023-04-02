@@ -195,7 +195,9 @@ class ExtKeyShare(_BaseExtension):
     ]
     def dump(self, host, context):
         if context.browser_type == 'chrome':
-            group_rand_key = b'\xfa\xfa' + struct.pack('!H', 1) + b'\x00'
+            grease = struct.pack('!H', context.grease_group)
+
+            group_rand_key = grease + struct.pack('!H', 1) + b'\x00'
             group_x25519_key = b'\x00\x1d' + struct.pack('!H', len(context.group_x25519_key)) + context.group_x25519_key
             key =  group_rand_key + group_x25519_key
         else:
@@ -203,6 +205,7 @@ class ExtKeyShare(_BaseExtension):
             group_secp_key = b'\x00\x17' + struct.pack('!H', len(context.group_secp_key)) + context.group_secp_key
 
             key = group_x25519_key + group_secp_key
+
         self.payload = struct.pack('!H', len(key)) + key
         self.fields_desc[1] = self.payload
 
@@ -228,7 +231,7 @@ class ExtSupportdVersions(_BaseExtension):
 
         if context.browser_type == 'chrome':
             self.payload = '\x06\xda\xda\x03\x04\x03\x03'
-            #self.payload = '\x02\x03\x03'
+            self.payload = '\x06\x8a\x8a\x03\x04\x03\x03'
         else:
             self.payload = '\x04\x03\x04\x03\x03'
         self.fields_desc[1] = self.payload
@@ -246,7 +249,7 @@ class ExtCompressCertificate(_BaseExtension):
 
 class ExtPadding(_BaseExtension):
     _type = 0x15
-    payload = bytes(135)
+    payload = bytes(random.randint(100,300))
     fields_desc = [
         _type,
         payload,
@@ -270,8 +273,6 @@ def make_randext(host, ext_type, payload=None,context=None):
 
 
 def dump_extension(host, context):
-    #771,4865,0-65281-10-51-43-13-45,29-23,0
-    #exts=None, exts_payload=None
 
     exts = context.exts
     exts_payload = context.exts_payload
@@ -294,12 +295,5 @@ def dump_extension(host, context):
     temp = b''.join(ext_data)
     return b'%s%s' % (struct.pack('!H',len(temp)), temp)
 
-
-if __name__ == '__main__':
-
-    exts = [0, 65281, 10 ,11,35,13172,16,5,13,222]
-    exts_payload = {222: 'a'}
-
-    host = '127.0.0.1'
 
 

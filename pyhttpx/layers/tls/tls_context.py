@@ -293,8 +293,7 @@ class TLSSessionCtx(object):
                 f.write(s)
 
 
-        import time
-        #time.sleep(11111)
+
         self.server_handshake_write_key = self.secrets['server_handshake_write_key']
         self.server_handshake_write_iv = self.secrets['server_handshake_write_iv']
         self.client_handshake_write_key = self.secrets['client_handshake_write_key']

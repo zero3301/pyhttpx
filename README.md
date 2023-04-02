@@ -24,8 +24,8 @@ brotli==1.0.9
 hpack==4.0.0
 ```
 ## 查看tls指纹
-- 在线查看,https://tls.peet.ws/api/all
-- 或者下载wireshark,查看完整握手流程，如果服务器返回已实现的密码套件,可随意魔改client hello包
+- 在线查看,https://tls.peet.ws/api/all,此方式ja3不全,建立抓包
+- 下载wireshark,查看完整握手流程
 
 
 
@@ -91,7 +91,7 @@ b'GET /get HTTP/1.1\r\nHost: httpbin.org ...
 >>>from pyhttpx.layers.tls.pyssl import SSLContext,PROTOCOL_TLSv1_2
 >>>import socket
 >>>addres = ('httpbin.org', 443)
->>>context = SSLContext(PROTOCOL_TLSv1_2)
+>>>context = SSLContext(PROTOCOL_TLSv1_2, http2=False)
 >>>sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
 >>>ssock = context.wrap_socket(sock, server_hostname=addres[0])
 >>>ssock.connect(addres)
