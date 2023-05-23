@@ -1,16 +1,16 @@
-import time
+
 from collections import namedtuple
 import hashlib
 import struct
 import os
-
 import hmac
-
 import rsa
+
 from cryptography.hazmat.primitives.asymmetric import x25519
 from cryptography.hazmat.primitives.asymmetric import ec as cg_ec
 from cryptography.hazmat.primitives import serialization
 
+from pyhttpx.layers.tls.crypto.cipher_aead import Cipher_AES_128_GCM_TLS13
 from pyhttpx.layers.tls.crypto.ecc import CryptoContextFactory
 from pyhttpx.layers.tls.crypto.prf import prf
 from pyhttpx.layers.tls.suites import (
@@ -19,8 +19,6 @@ from pyhttpx.layers.tls.suites import (
 )
 from pyhttpx.layers.tls.crypto.hkdf import TLS13_HKDF
 from pyhttpx.exception import TLSVerifyDataExpetion
-
-import threading
 
 class TLSContext(object):
 
@@ -47,6 +45,7 @@ def rsa_encrypt(plaintxt, publickey):
 class TLSSessionCtx(object):
 
     def __init__(self, client=True):
+
         self.client = client
         self.server = not self.client
         self.client_ctx = TLSContext("Client TLS context")
@@ -202,6 +201,7 @@ class TLSSessionCtx(object):
                 s = f'CLIENT_RANDOM {self.client_ctx.random.hex()} {self.master_secret.hex()}'
                 f.write(s)
 
+
     def key_expandsion(self):
         seed = b'key expansion' + self.server_ctx.random + self.client_ctx.random
         self.key_block = prf(self.master_secret, seed, self.hash_alg, outlen=256)
@@ -283,6 +283,7 @@ class TLSSessionCtx(object):
         server_handshake_traffic_secret = self.secrets['server_handshake_traffic_secret']
 
         sslkey_file_name = os.environ.get('SSLKEYLOGFILE')
+
         if sslkey_file_name:
             with open(sslkey_file_name, 'a') as f:
                 s = f'CLIENT_HANDSHAKE_TRAFFIC_SECRET {self.client_ctx.random.hex()} {client_handshake_traffic_secret.hex()}\n' \
@@ -292,17 +293,11 @@ class TLSSessionCtx(object):
 
                 f.write(s)
 
-
-
         self.server_handshake_write_key = self.secrets['server_handshake_write_key']
         self.server_handshake_write_iv = self.secrets['server_handshake_write_iv']
         self.client_handshake_write_key = self.secrets['client_handshake_write_key']
         self.client_handshake_write_iv = self.secrets['client_handshake_write_iv']
-
         self.tls13_master_secret = self.secrets['tls13_master_secret']
-
-
-
         self.client_ctx.crypto_alg = self.cls_cipher_alg(self.client_handshake_write_key, self.client_handshake_write_iv)
         self.server_ctx.crypto_alg = self.cls_cipher_alg(self.server_handshake_write_key, self.server_handshake_write_iv)
 
@@ -343,7 +338,6 @@ class TLSSessionCtx13(TLSSessionCtx):
 
 
         self.handshake_data = []
-
         self.tls_version = b'\x03\x04'
 
         name_curve = 0x001d
@@ -373,11 +367,7 @@ class TLSSessionCtx13(TLSSessionCtx):
         self.server_handshake_write_iv = self.secrets['server_handshake_write_iv']
         self.client_handshake_write_key = self.secrets['client_handshake_write_key']
         self.client_handshake_write_iv = self.secrets['client_handshake_write_iv']
-
         self.tls13_master_secret = self.secrets['tls13_master_secret']
-
-
-
         self.client_ctx.crypto_alg = self.cls_cipher_alg(self.client_handshake_write_key, self.client_handshake_write_iv)
         self.server_ctx.crypto_alg = self.cls_cipher_alg(self.server_handshake_write_key, self.server_handshake_write_iv)
 
@@ -405,7 +395,7 @@ class TLSSessionCtx13(TLSSessionCtx):
                                                                   b"", 12)
 
 
-    def encrypt(self, P,content_type ):
+    def encrypt(self, P, content_type ):
 
         sequence = struct.pack('!Q', self.client_ctx.sequence)
         p_len = len(P)
@@ -429,17 +419,12 @@ class TLSSessionCtx13(TLSSessionCtx):
 
     def load_alg(self):
         cipher_name = TLS_SUITES.get(self.negotiated.ciphersuite)['name']
-
         kx_alg, cipher_alg, hmac_alg, hash_alg, tls1_3 = get_algs_from_ciphersuite_name(cipher_name)
         self.hash_alg = hashlib.sha256
-        from pyhttpx.layers.tls.crypto.cipher_aead import Cipher_AES_128_GCM_TLS13
-
         self.hmac_alg = hashlib.sha256
         self.cls_cipher_alg = Cipher_AES_128_GCM_TLS13
-
         self.kx_alg = kx_alg
         self.hmac_alg = hmac_alg
-
 
     def compute_verify_data(self):
         verify_data = self.hkdf.compute_verify_data(
@@ -447,5 +432,4 @@ class TLSSessionCtx13(TLSSessionCtx):
 
         #verify_data_len=3byte
         verify_data  = b'\x14' + struct.pack("!I", len(verify_data))[1:] + verify_data + b'\x16'
-
         return verify_data

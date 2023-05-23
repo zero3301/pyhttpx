@@ -20,6 +20,7 @@ requirement.txt
 cryptography==36.0.1
 rsa==4.8
 pyOpenSSL==21.0.0
+
 brotli==1.0.9
 hpack==4.0.0
 ```
@@ -70,9 +71,8 @@ b'GET /get HTTP/1.1\r\nHost: httpbin.org ...
 
 ## HTTP PROXY
 ```
->>> proxies = {'https': '127.0.0.1:7890'}
->>> proxy_auth = (username, password)
->>> r = sess.post('https://httpbin.org/get',proxies=proxies,proxy_auth=proxy_auth)
+>>> proxies = {'https': 'http://username:password@host:port'}
+>>> r = sess.post('https://httpbin.org/get',proxies=proxies)
 ```
 
 ## ALLOW_REDIRECTS

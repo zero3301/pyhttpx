@@ -27,12 +27,12 @@ from pyhttpx.exception import (
     ReadTimeout)
 
 from pyhttpx.layers.tls.socks import SocketProxy
-
+from pyhttpx.utils import _parse_proxy_url
 
 PROTOCOL_TLSv1_2 = b'\x03\x03'
 PROTOCOL_TLSv1_3 = b'\x03\x04'
 def default_context():
-    return SSLContext(PROTOCOL_TLSv1_2)
+    return SSLContext(PROTOCOL_TLSv1_3)
 
 
 class SSLContext:
@@ -50,7 +50,7 @@ class SSLContext:
         self.http2 = http2
         self.application_layer_protocol_negotitaion = 'http/1.1'
         self.tlsversion = b'\x03\x03'
-
+        self.tls_max = 4
 
     def set_payload(self, browser_type=None,
                     ja3=None,
@@ -59,8 +59,8 @@ class SSLContext:
         self.browser_type = browser_type or 'chrome'
         self.exts_payload = exts_payload
         self.shuffle_extension_protocol = shuffle_extension_protocol
-        #https://www.rfc-editor.org/rfc/rfc8701
 
+        #https://www.rfc-editor.org/rfc/rfc8701
         grease_list = [
             0x0A0A, 0x1A1A,
             0x2A2A, 0x3A3A,
@@ -149,34 +149,36 @@ class TLSSocket():
     def isclosed(self, value):
         setattr(self, '_closed', value)
 
-    def connect(self,addres, timeout=None, proxies=None, proxy_auth=None):
+    def connect(self,addres, timeout=None, proxies=None):
         self.servercontext = ServerContext()
         self.tls_cxt = TLSSessionCtx()
         self.context.group_x25519_key = self.tls_cxt.group_x25519_key
         self.context.group_secp_key = self.tls_cxt.group_secp_key
         self.tls_cxt.handshake_data = []
+
         self.host,self.port = addres[0],int(addres[1])
-        self.proxy_auth = proxy_auth
+
         if not self.sock:          
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.timeout  = timeout
         self.proxies = proxies
         
         if self.proxies and self.proxies.get('https'):
             self.sock = SocketProxy(socket.AF_INET, socket.SOCK_STREAM)
             proxy = self.proxies['https']
-            if not ':' in proxy:
-                raise ProxyError(f'ProxyError: {proxy}')
-            proxy_ip, proxy_port = proxy.split(':')
-            if self.proxy_auth:
-                username,password = proxy_auth[0], proxy_auth[1]
+            proxy_parse = _parse_proxy_url(proxy)
+            if proxy_parse.auth:
+                username,password = proxy_parse.auth.split(':')
             else:
-                username, password = None,None
+                username, password = (None, None)
 
-            self.sock.set_proxy(SocketProxy.HTTP, proxy_ip, proxy_port,username, password )
+            self.sock.set_proxy(SocketProxy.HTTP,
+                                proxy_parse.host,
+                                proxy_parse.port,
+                                username,
+                                password )
 
         try:
             self.sock.settimeout(self.timeout)
@@ -210,7 +212,7 @@ class TLSSocket():
             while len(head_flowtext) < length:
                 s = self.mutable_recv(recv_len)
                 if not s:
-                    raise TLSHandshakeFailed('handshake failed')
+                    raise ConnectionClosed('server closed connect')
 
                 head_flowtext += s
                 recv_len = length - len(head_flowtext)
@@ -224,7 +226,7 @@ class TLSSocket():
 
                 s = self.mutable_recv(recv_len)
                 if not s:
-                    raise TLSHandshakeFailed('handshake failed')
+                    raise ConnectionClosed('server closed connect')
                 flowtext += s
                 recv_len = length - len(flowtext)
 
@@ -261,7 +263,10 @@ class TLSSocket():
 
                     if self.tls13:
                         self.server_change_cipher_spec = True
+
                         server_publickey = self.servercontext.serverstore.ext[51][4:]
+                        if self.servercontext.serverstore.ext[51][:2] == b'\x00\x1d' and len(server_publickey) != 32:
+                            raise ConnectionClosed('server closed connect')
                         self.tls_cxt.negotiated.ciphersuite = int(self.servercontext.serverstore.cipher_suit.hex(), 16)
                         self.tls_cxt.load_alg()
                         self.tls_cxt.make_secret(server_publickey)
@@ -330,7 +335,7 @@ class TLSSocket():
                             data = b'\x17\x03\x03' + struct.pack('!H', len(ciphertext)) + ciphertext
                             self.sock.sendall(data)
 
-                            #去掉certificate_request, 不然效验数据出错, 暂不清楚为什么
+                            #去掉certificate_request
                             if self.tls_cxt.certificate_request:
                                 self.tls_cxt.handshake_data.pop()
 
@@ -354,7 +359,6 @@ class TLSSocket():
 
                         elif handshake_type == 0x0d:
                             #certificate request
-                            pass
                             self.tls_cxt.certificate_request = True
                         elif handshake_type == 0x0f:
                             #证书服务器验证15
@@ -387,6 +391,7 @@ class TLSSocket():
                     self.tls_cxt.rsa_pulicKey = self.servercontext.certificatecontext.rsa_pulicKey
                     self.tls_cxt.curve_name = self.servercontext.curve_name
                     self.tls_cxt.server_ecdhe_pubkey = self.servercontext.serverpubkey
+
                     if 23 in self.servercontext.serverstore.ext.keys():
                         self.tls_cxt.extended_master_secret = True
 

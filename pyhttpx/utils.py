@@ -1,6 +1,21 @@
 import logging
 from collections import defaultdict
 
+from urllib3.util import parse_url
+from requests.utils import prepend_scheme_if_needed
+from requests.exceptions import InvalidProxyURL
+
+
+def _parse_proxy_url(proxy_url):
+    proxy_url = prepend_scheme_if_needed(proxy_url, "http")
+    parsed_proxy_url = parse_url(proxy_url)
+
+    if not parsed_proxy_url.host:
+        raise InvalidProxyURL(
+            "Please check proxy URL. It is malformed" " and could be missing the host."
+        )
+
+    return parsed_proxy_url
 
 class IgnoreCaseDict(defaultdict):
     #忽略key大小写

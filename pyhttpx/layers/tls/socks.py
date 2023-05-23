@@ -32,12 +32,12 @@ class SocketProxy(socket.socket):
         http_headers = [
             (b"CONNECT " + dest_addr.encode("idna") + b":"
              + str(dest_port).encode() + b" HTTP/1.1"),
-            b"Host: " + dest_addr.encode("idna")
+
         ]
 
         if username and password:
             http_headers.append(b"Proxy-Authorization: Basic "
-                                + b64encode(username.encode('latin1') + b":" + password.encode('latin1')))
+                                 + b64encode(username.encode('latin1') + b":" + password.encode('latin1')))
 
         http_headers.append(b"\r\n")
         try:
@@ -73,8 +73,7 @@ if __name__ == '__main__':
     sock  = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
     s = SocketProxy()
     s.set_proxy(1, '127.0.0.1', 7890)
-    s.connect(('www.google.com',443))
-    print(s.getsockname())
+    s.connect(('httpbin.org',443))
 
 
 

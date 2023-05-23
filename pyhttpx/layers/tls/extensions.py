@@ -230,12 +230,15 @@ class ExtSupportdVersions(_BaseExtension):
     def dump(self, host, context):
 
         if context.browser_type == 'chrome':
-            self.payload = '\x06\xda\xda\x03\x04\x03\x03'
-            self.payload = '\x06\x8a\x8a\x03\x04\x03\x03'
+            if getattr(context, 'tls_max') == 3:
+                self.payload = '\x04\x8a\x8a\x03\x03'
+            else:
+                self.payload = '\x06\x8a\x8a\x03\x04\x03\x03'
+
         else:
             self.payload = '\x04\x03\x04\x03\x03'
-        self.fields_desc[1] = self.payload
 
+        self.fields_desc[1] = self.payload
         return super().dump(host, context)
 
 
@@ -268,6 +271,7 @@ def make_randext(host, ext_type, payload=None,context=None):
         ext_type,
         payload,
     ]
+
     ext = type('=^_^=', (_BaseExtension,), dict(fields_desc=fields_desc))
     return ext().dump(host, context)
 
@@ -280,17 +284,23 @@ def dump_extension(host, context):
 
     if exts_payload is None:
         exts_payload = {}
+
     if not exts:
         for e in list(_tls_ext_cls.values())[:]:
             ext_data.append(e().dump(host, context))
 
     else:
         for e in exts:
-            if _tls_ext_cls.get(e):
+
+            if e in exts_payload.keys():
+                payload = exts_payload.get(e)
+                d = make_randext(host, e, payload)
+            elif _tls_ext_cls.get(e):
                 d = _tls_ext_cls.get(e)().dump(host, context)
             else:
                 payload = exts_payload.get(e)
                 d = make_randext(host, e, payload)
+
             ext_data.append(d)
     temp = b''.join(ext_data)
     return b'%s%s' % (struct.pack('!H',len(temp)), temp)

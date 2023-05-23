@@ -81,7 +81,7 @@ class TLSSocket:
         self.server_change_cipher_spec = False
         while True:
             try:
-                recv = await self.reader.read(6324)
+                recv = await self.reader.read(8191)
 
             except (ConnectionRefusedError, ConnectionResetError, socket.timeout):
                 raise ConnectionTimeout('无法连接 %s:%s' % (self.host, self.port))
@@ -91,6 +91,7 @@ class TLSSocket:
 
             if recv:
                 while recv:
+
                     handshake_type = struct.unpack('!B', recv[:1])[0]
                     length = struct.unpack('!H', recv[3:5])[0]
                     flowtext = recv[5:5 + length]
@@ -106,7 +107,6 @@ class TLSSocket:
                             self.servercontext.load(flowtext)
 
                         if not exchanage and self.server_change_cipher_spec:
-                            # print(threading.current_thread().name,'成功握手,server Encrypted Handshake Message')
                             # 验证服务器消息,Encrypted Handshake Message,效验密钥
 
                             server_verify_data = self.tls_cxt.decrypt(flowtext, b'\x16')
@@ -185,6 +185,7 @@ class TLSSocket:
                 p = self.tls_cxt.decrypt(flowtext, b'\x17')
                 self.plaintext_reader += p
 
+
             elif handshake_type == 0x15:
                 self.isclosed = True
                 exc_alert = True
@@ -204,16 +205,17 @@ def default_context():
 
 
 class SSLContext:
-    def __init__(self, protocol=None, http2=True):
+    def __init__(self, protocol=None, http2=False):
         self.protocol = protocol
         self.check_hostname: bool = False
         self.browser_type = 'chrome'
-        self.http2 = False
+        self.http2 = http2
         self.ciphers = None
         self.exts = None
         self.exts_payload = None
         self.supported_groups = None
         self.ec_points = None
+        self.tls_max = 3
 
     def set_payload(self, browser_type=None,
                     ja3=None,
@@ -238,6 +240,7 @@ class SSLContext:
             e = random.choice(grease_list)
             grease_list.remove(e)
             return e
+
 
         if ja3:
             self.ja3 = ja3
@@ -297,19 +300,8 @@ class SSLContext:
 
 
 
-async def main():
-    host = '127.0.0.1'
-    port = 443
-    addres = (host, port)
-    context = SSLContext(PROTOCOL_TLSv1_2)
 
-    sock = context.wrap_socket()
-    await sock.connect(addres)
 
-    m = 'GET / HTTP/1.1\r\n\r\n'
-    await sock.sendall(m.encode())
-    data = await sock.recv(1024)
-    print(data)
 
 
 

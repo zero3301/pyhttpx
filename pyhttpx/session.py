@@ -81,8 +81,7 @@ class HTTPSConnectionPool:
         conn.connect(
             (self.req.host,self.req.port),
             timeout=self.req.timeout,
-            proxies=self.req.proxies,
-            proxy_auth=self.req.proxy_auth)
+            proxies=self.req.proxies,)
 
         return conn
 
@@ -148,8 +147,18 @@ class HttpSession(object):
         self.cookie_manger.set_cookie(req,c)
 
 
-    def request(self, method, url,update_cookies=True,timeout=None,proxies=None,proxy_auth=None,
-                params=None, data=None, headers=None, cookies=None,json=None,allow_redirects=True,verify=None):
+    def request(self, method,
+                url,
+                update_cookies=True,
+                timeout=None,
+                proxies=None,
+                params=None,
+                data=None,
+                headers=None,
+                cookies=None,
+                json=None,
+                allow_redirects=True,
+                verify=None):
 
         #多线程,采用局部变量
         req = Request(
@@ -162,7 +171,6 @@ class HttpSession(object):
             params=params or {},
             timeout=timeout,
             proxies=proxies,
-            proxy_auth=proxy_auth,
             allow_redirects=allow_redirects,
 
         )
@@ -218,8 +226,8 @@ class HttpSession(object):
         msg = b'%s %s HTTP/1.1\r\n' % (req.method.encode('latin1'), req.path.encode('latin1'))
         dh = copy.deepcopy(req.headers) or default_headers()
         dh.update(send_kw)
-        dh['host'] = req.host
-        dh=dict((k.lower(), v) for k, v in dh.items())
+        dh['Host'] = req.host
+        dh=dict((k, v) for k, v in dh.items())
         req_body = ''
 
         if req.method == 'POST':
@@ -233,11 +241,11 @@ class HttpSession(object):
             elif req.json:
                 req_body = json.dumps(req.json, separators=(',', ':'))
 
-            dh['content-length'] = len(req_body)
+            dh['Content-Length'] = len(req_body)
 
         else:
-            if dh.get('content-length'):
-                del dh['content-length']
+            if dh.get('Content-Length'):
+                del dh['Content-Length']
 
         for k, v in dh.items():
             msg += ('%s: %s\r\n' % (k, v)).encode('latin1')
@@ -349,7 +357,7 @@ class HttpSession(object):
             k = k.lower()
             dh[k] = v
         if req.method == 'POST':
-            dh['content-length'] = len(req_body)
+            dh['Content-Length'] = len(req_body)
 
         head_block = []
         for k,v in dh.items():

@@ -12,13 +12,12 @@ import threading
 import requests
 
 headers={
-
+'Host': '*',
 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
 'Pragma': 'no-cache',
 'Cache-Control': 'no-cache',
 'sec-ch-ua-platform': '"Windows"',
 'sec-ch-ua-mobile': '?0',
-#'Content-type': 'application/x-www-form-urlencoded',
 'Accept': '*/*',
 'Sec-Fetch-Site': 'cross-site',
 'Sec-Fetch-Mode': 'cors',
@@ -32,10 +31,14 @@ headers={
 def main():
     sess = pyhttpx.HttpSession(http2=False,
                                browser_type='chrome',
+                               shuffle_extension_protocol=True
                                )
 
     url='https://tls.peet.ws/api/all'
-    #url = 'https://httpbin.org/get'
+    #url = 'https://httpbin.org/ip'
+    proxies = {
+        'https': 'http://username:password@host:port'
+    }
     r = sess.get(url,headers=headers)
     print(r.status_code)
     print(r.text)

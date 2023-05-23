@@ -4,7 +4,8 @@ import struct
 import hashlib
 import base64
 import os
-
+import time
+import zlib
 from urllib.parse import urlparse
 import socket
 
@@ -100,7 +101,7 @@ class WebSocketClient:
             if b != sec_websocket_accept.encode():
                 raise SecWebSocketKeyError('sec_websocket_key verify failed')
         else:
-            raise SwitchingProtocolError(f"host={self.addres[0]},path={self.path},switching protocol error,status_code {status_code},text: {data}")
+            raise SwitchingProtocolError(f"connect fail!, status_code {status_code}")
 
     async def on_open(self):
 
@@ -144,14 +145,21 @@ class WebSocketClient:
             MASK |= len(data)
             m = struct.pack('!B', MASK)
             s += m
+
         elif 126 <= len(data) <= 2 ** 16 -1:
             MASK = 0b10000000
+            #数据长度2字节
             MASK |= 126
+            #谁否掩码
             m = struct.pack('!B', MASK)
             s += m
             s += struct.pack('!H', len(data))
+
+
+
         elif 2 ** 16 -1 <  len(data) <= 2**64 -1:
             MASK = 0b10000000
+            #数据长度8字节
             MASK |= 127
             m = struct.pack('!B', MASK)
             s += m
@@ -182,6 +190,7 @@ class WebSocketClient:
         FIN = frame_head >> 7
         opcode = frame_head & 0b1111
         payload_len = self.cache_buffer[1] & 0b1111111
+        per_message_compressed = frame_head >> 6 & 1
 
         if payload_len < 126:
             n = 2
@@ -199,10 +208,14 @@ class WebSocketClient:
             msg = self.cache_buffer[n:n + msg_len]
             self.cache_buffer = self.cache_buffer[n + msg_len:]
 
+
         while len(msg) < msg_len:
             #数据长度不足,缓存中的数据还属于当前帧,继续读取
-            d = self.sock.recv(msg_len)
+            d = await self.sock.recv(msg_len)
             msg += d
+
+        if per_message_compressed:
+            msg = zlib.decompressobj(-zlib.MAX_WBITS).decompress(msg)
 
         if opcode == 0x00:
             self.reader_buffer += msg
@@ -236,6 +249,7 @@ class WebSocketClient:
         while 1:
             #握手过程产生的缓存数据
             result = await self.handle()
+
             if result:
                 return result
             try:

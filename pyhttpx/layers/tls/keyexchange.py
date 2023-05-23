@@ -32,7 +32,6 @@ class ServerStore:
 
         self.cipher_name = TLS_SUITES.get(int(self.cipher_suit.hex(), 16))['name']
         ext_len = struct.unpack('!H',flowtext[3:5])[0]
-
         ext_datas = flowtext[5:5+ext_len]
 
         while ext_datas:
