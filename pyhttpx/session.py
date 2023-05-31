@@ -112,7 +112,7 @@ class HttpSession(object):
                  exts_payload=None,
                  browser_type=None,
                  http2=True ,
-                 shuffle_extension_protocol=False):
+                 ):
         #默认开启http2, 最终协议由服务器协商完成
         self.http2 = http2
         self.tls_session = None
@@ -124,7 +124,7 @@ class HttpSession(object):
         self.exts_payload = exts_payload
         self.lock = RLock()
         self.ja3 = ja3
-        self.shuffle_extension_protocol = shuffle_extension_protocol
+        self.shuffle_extension_protocol = False
     def handle_cookie(self, req, set_cookies):
         #
         if not set_cookies:
