@@ -26,11 +26,7 @@ hpack==4.0.0
 ```
 
 
->>>sess = pyhttpx.HttpSession()
->>>r = sess.get('https://tls.peet.ws/api/all')
->>>r.text
-... "ja3": "771,4865-4866...
-```
+
 
 ## GET
 ```
