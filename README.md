@@ -24,18 +24,9 @@ pyOpenSSL==21.0.0
 brotli==1.0.9
 hpack==4.0.0
 ```
-## 查看tls指纹
-- 在线查看,https://tls.peet.ws/api/all,此方式ja3不全,建立抓包
-- 下载wireshark,查看完整握手流程
 
 
-
-## HttpSession 
-- 方式一: 使用内置ja3
-- 方式二: 指定ja3= '771,...',使用此方式需要抓包分析,并确保扩展协议不带41
-
-```
->>>sess = pyhttpx.HttpSession(browser_type='chrome', http2=True)
+>>>sess = pyhttpx.HttpSession()
 >>>r = sess.get('https://tls.peet.ws/api/all')
 >>>r.text
 ... "ja3": "771,4865-4866...
@@ -46,7 +37,6 @@ hpack==4.0.0
 >>> import pyhttpx
 >>> sess = pyhttpx.HttpSession()
 >>> r = sess.get('https://httpbin.org/get',headers={'User-Agent':'3301'},cookies={'k':'3301')
->>> r = sess.get('https://httpbin.org/get',headers={'User-Agent':'3301'},cookies='k=3301')
 >>> r.status_code
 200
 >>> r.encoding
@@ -66,7 +56,6 @@ b'GET /get HTTP/1.1\r\nHost: httpbin.org ...
 ## POST
 ```
 >>> r = sess.post('https://httpbin.org/get',data={})
->>> r = sess.post('https://httpbin.org/get',json={})
 ```
 
 ## HTTP PROXY
