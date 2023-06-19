@@ -31,7 +31,6 @@ headers={
 def main():
     sess = pyhttpx.HttpSession(http2=False,
                                browser_type='chrome',
-                               shuffle_extension_protocol=True
                                )
 
     url='https://tls.peet.ws/api/all'
